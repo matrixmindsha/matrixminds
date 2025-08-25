@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, MapPin } from "lucide-react";
-import founderImage from "@/assets/founder.png";
+import founderImage from "/lovable-uploads/6cc168a1-4df4-4afe-8f8d-7821cd59b7df.png";
 
 const AboutSection = () => {
   return (
