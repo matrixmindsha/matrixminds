@@ -6,6 +6,7 @@ import ServicesSection from "@/components/ServicesSection";
 import FeedbackSection from "@/components/FeedbackSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
+import HarAI from "@/components/HarAI";
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
         <ContactSection />
       </main>
       <Footer />
+      <HarAI />
     </div>
   );
 };
