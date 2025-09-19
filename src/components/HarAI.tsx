@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, X, Bot } from "lucide-react";
+import harAIAvatar from "@/assets/har-ai-avatar.png";
 
 interface Message {
   id: string;
@@ -86,10 +87,10 @@ const HarAI = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
-          className="rounded-full w-16 h-16 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg hover:shadow-xl transition-all duration-300"
+          className="rounded-full w-16 h-16 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg hover:shadow-xl transition-all duration-300 p-2"
           size="lg"
         >
-          <Bot className="w-8 h-8" />
+          <img src={harAIAvatar} alt="HAR AI" className="w-full h-full object-contain" />
         </Button>
       </div>
     );
@@ -101,7 +102,7 @@ const HarAI = () => {
         <CardHeader className="pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Bot className="w-6 h-6" />
+              <img src={harAIAvatar} alt="HAR AI" className="w-6 h-6 object-contain" />
               <CardTitle className="text-lg">HAR AI Assistant</CardTitle>
             </div>
             <Button
