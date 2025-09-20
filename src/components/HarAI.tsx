@@ -30,6 +30,8 @@ const HarAI = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isLongPressing, setIsLongPressing] = useState(false);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -59,15 +61,58 @@ const HarAI = () => {
     }
   }, []);
 
-  // Dragging functionality
+  // Long press and dragging functionality
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsDragging(true);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setDragOffset({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     });
+
+    // Start long press timer
+    const timer = setTimeout(() => {
+      setIsLongPressing(true);
+      setIsDragging(true);
+    }, 500); // 500ms long press
+
+    setLongPressTimer(timer);
+  };
+
+  const handleMouseUp = () => {
+    // Clear long press timer
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    setIsLongPressing(false);
+    setIsDragging(false);
+  };
+
+  // Touch events for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setDragOffset({
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    });
+
+    const timer = setTimeout(() => {
+      setIsLongPressing(true);
+      setIsDragging(true);
+    }, 500);
+
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    setIsLongPressing(false);
+    setIsDragging(false);
   };
 
   useEffect(() => {
@@ -87,18 +132,34 @@ const HarAI = () => {
       }
     };
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging) {
+        const touch = e.touches[0];
+        const newX = touch.clientX - dragOffset.x;
+        const newY = touch.clientY - dragOffset.y;
+        
+        const maxX = window.innerWidth - 384;
+        const maxY = window.innerHeight - 500;
+        
+        setPosition({
+          x: Math.max(0, Math.min(maxX, newX)),
+          y: Math.max(0, Math.min(maxY, newY)),
+        });
+      }
     };
 
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = 'none'; // Prevent text selection while dragging
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
+      document.body.style.userSelect = 'none';
       
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
         document.body.style.userSelect = '';
       };
     }
@@ -214,8 +275,9 @@ const HarAI = () => {
     >
       <Card className="w-96 h-[500px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <CardHeader 
-          className="pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg cursor-move select-none"
+          className={`pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg cursor-move select-none ${isLongPressing ? 'bg-opacity-80' : ''}`}
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -231,7 +293,7 @@ const HarAI = () => {
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-sm text-white/90">Powered by Matrix Minds • Drag to move</p>
+          <p className="text-sm text-white/90">Powered by Matrix Minds • Long press header to move</p>
         </CardHeader>
         
         <CardContent className="p-0 h-full flex flex-col">
