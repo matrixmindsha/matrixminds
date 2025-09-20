@@ -118,7 +118,7 @@ All colors MUST be HSL.
     background-attachment: fixed;
   }
   
-  /* Matrix-inspired animations */
+  /* Advanced tech animations */
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
@@ -133,6 +133,37 @@ All colors MUST be HSL.
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
   }
+
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(217, 91%, 60%, 0.3);
+      transform: scale(1);
+    }
+    50% { 
+      box-shadow: 0 0 40px hsl(217, 91%, 60%, 0.6);
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes data-stream {
+    0% { transform: translateX(-100%); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(100vw); opacity: 0; }
+  }
+
+  @keyframes circuit-glow {
+    0%, 100% { 
+      filter: drop-shadow(0 0 5px hsl(197, 71%, 47%, 0.4));
+    }
+    50% { 
+      filter: drop-shadow(0 0 15px hsl(197, 71%, 47%, 0.8));
+    }
+  }
+
+  @keyframes scan-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
   
   .animate-float {
     animation: float 3s ease-in-out infinite;
@@ -144,5 +175,69 @@ All colors MUST be HSL.
   
   .animate-matrix-text {
     animation: matrix-text 0.8s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .animate-data-stream {
+    animation: data-stream 8s linear infinite;
+  }
+
+  .animate-circuit-glow {
+    animation: circuit-glow 2s ease-in-out infinite;
+  }
+
+  .animate-scan-line {
+    animation: scan-line 4s linear infinite;
+  }
+
+  /* Tech grid overlay */
+  .tech-grid {
+    background-image: 
+      linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-move 20s linear infinite;
+  }
+
+  @keyframes grid-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+  }
+
+  /* Performance optimizations */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .gpu-accelerate {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
   }
 }

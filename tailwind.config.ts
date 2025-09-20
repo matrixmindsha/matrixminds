@@ -84,11 +84,54 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'tech-pulse': {
+					'0%, 100%': { 
+						transform: 'scale(1)',
+						opacity: '1'
+					},
+					'50%': { 
+						transform: 'scale(1.05)',
+						opacity: '0.8'
+					}
+				},
+				'matrix-rain': {
+					'0%': { 
+						transform: 'translateY(-100%)',
+						opacity: '0'
+					},
+					'10%': { 
+						opacity: '1'
+					},
+					'90%': { 
+						opacity: '1'
+					},
+					'100%': { 
+						transform: 'translateY(100vh)',
+						opacity: '0'
+					}
+				},
+				'hologram': {
+					'0%, 100%': {
+						'background-position': '0% 50%'
+					},
+					'50%': {
+						'background-position': '100% 50%'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'tech-pulse': 'tech-pulse 2s ease-in-out infinite',
+				'matrix-rain': 'matrix-rain 3s linear infinite',
+				'hologram': 'hologram 3s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'tech-pattern': 'linear-gradient(45deg, transparent 25%, rgba(59, 130, 246, 0.1) 25%, rgba(59, 130, 246, 0.1) 50%, transparent 50%, transparent 75%, rgba(59, 130, 246, 0.1) 75%)',
+				'hologram-bg': 'linear-gradient(-45deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)), hsl(var(--accent)))'
 			}
 		}
 	},
