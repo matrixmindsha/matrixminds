@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, X, Bot } from "lucide-react";
+import { MessageCircle, Send, X, Bot, Mic, MicOff, Volume2 } from "lucide-react";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 
 interface Message {
@@ -24,6 +24,37 @@ const HarAI = () => {
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInputMessage(transcript);
+        setIsListening(false);
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
 
   const predefinedResponses: { [key: string]: string } = {
     "services": "Matrix Minds offers cutting-edge AI & Machine Learning solutions, Ethical Hacking & Cybersecurity services, and Data Science & Analytics. We specialize in custom AI models, penetration testing, security audits, and business intelligence solutions.",
@@ -33,6 +64,30 @@ const HarAI = () => {
     "hacking": "Our ethical hacking services include penetration testing, vulnerability assessments, security audits, compliance testing, and cybersecurity consulting. We help organizations identify and fix security vulnerabilities before malicious actors can exploit them.",
     "projects": "Matrix Minds has successfully completed 50+ projects across various industries including healthcare, finance, e-commerce, and manufacturing. Our portfolio includes AI chatbots, security assessment tools, data analytics dashboards, and custom ML solutions.",
     "experience": "S. Hareedh has extensive experience in technology leadership, having worked on diverse projects ranging from AI-powered applications to comprehensive security assessments. His expertise spans multiple programming languages, frameworks, and cutting-edge technologies."
+  };
+
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.8;
+      utterance.pitch = 1;
+      utterance.volume = 0.8;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  const startListening = () => {
+    if (recognitionRef.current && speechSupported) {
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
   };
 
   const getBotResponse = (userMessage: string): string => {
@@ -65,15 +120,19 @@ const HarAI = () => {
       timestamp: new Date(),
     };
 
+    const botResponseText = getBotResponse(inputMessage);
     const botResponse: Message = {
       id: (Date.now() + 1).toString(),
-      text: getBotResponse(inputMessage),
+      text: botResponseText,
       isBot: true,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage, botResponse]);
     setInputMessage("");
+    
+    // Speak the bot response
+    setTimeout(() => speakText(botResponseText), 500);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -151,13 +210,28 @@ const HarAI = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask HAR AI anything..."
+                placeholder="Type or click mic to speak..."
                 className="flex-1"
               />
-              <Button onClick={handleSendMessage} size="sm">
+              {speechSupported && (
+                <Button
+                  onClick={isListening ? stopListening : startListening}
+                  size="sm"
+                  variant={isListening ? "destructive" : "outline"}
+                  className={isListening ? "animate-pulse" : ""}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </Button>
+              )}
+              <Button onClick={handleSendMessage} size="sm" disabled={!inputMessage.trim()}>
                 <Send className="w-4 h-4" />
               </Button>
             </div>
+            {speechSupported && (
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                {isListening ? "Listening... Speak now" : "Click the microphone to speak"}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
