@@ -27,6 +27,9 @@ const HarAI = () => {
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // Initialize speech recognition
   useEffect(() => {
@@ -55,6 +58,40 @@ const HarAI = () => {
       recognitionRef.current = recognition;
     }
   }, []);
+
+  // Dragging functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
 
   const predefinedResponses: { [key: string]: string } = {
     "services": "Matrix Minds offers cutting-edge AI & Machine Learning solutions, Ethical Hacking & Cybersecurity services, and Data Science & Analytics. We specialize in custom AI models, penetration testing, security audits, and business intelligence solutions.",
@@ -156,9 +193,19 @@ const HarAI = () => {
   }
 
   return (
-    <div className="fixed bottom-14 right-6 z-50">
+    <div 
+      className={`fixed z-50 ${position.x === 0 && position.y === 0 ? 'bottom-14 right-6' : ''}`}
+      style={
+        position.x !== 0 || position.y !== 0
+          ? { left: `${position.x}px`, top: `${position.y}px` }
+          : {}
+      }
+    >
       <Card className="w-96 h-[500px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <CardHeader className="pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg">
+        <CardHeader 
+          className="pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg cursor-move select-none"
+          onMouseDown={handleMouseDown}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src={harAIAvatar} alt="HAR AI" className="w-6 h-6 object-contain" />
@@ -173,7 +220,7 @@ const HarAI = () => {
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-sm text-white/90">Powered by Matrix Minds</p>
+          <p className="text-sm text-white/90">Powered by Matrix Minds • Drag to move</p>
         </CardHeader>
         
         <CardContent className="p-0 h-full flex flex-col">
