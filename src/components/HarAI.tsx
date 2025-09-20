@@ -143,7 +143,7 @@ const HarAI = () => {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-14 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
           className="rounded-full w-16 h-16 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg hover:shadow-xl transition-all duration-300 p-2"
@@ -156,7 +156,7 @@ const HarAI = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-14 right-6 z-50">
       <Card className="w-96 h-[500px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <CardHeader className="pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg">
           <div className="flex items-center justify-between">
