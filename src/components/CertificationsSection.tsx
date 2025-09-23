@@ -10,8 +10,17 @@ import electronicsCert from "@/assets/certificates/electronics-certificate.jpg";
 import dataAnalyticsCert from "@/assets/certificates/data-analytics-certificate.jpg";
 import stemDiploma from "@/assets/certificates/stem-diploma.jpg";
 import aiMasterclassCert from "@/assets/certificates/ai-masterclass-certificate.jpg";
+import cybersecurityCert from "@/assets/certificates/cybersecurity-certificate.jpg";
 
 const certifications = [
+  {
+    title: "Cybersecurity Assessment",
+    organization: "LearnTube.ai",
+    date: "March 26, 2025",
+    image: cybersecurityCert,
+    type: "Certificate",
+    category: "Cybersecurity"
+  },
   {
     title: "30 Days MasterClass in Artificial Intelligence",
     organization: "NoviTech R&D Private Limited",
