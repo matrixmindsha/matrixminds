@@ -8,8 +8,8 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Tech-inspired color palette for Matrix Minds */
-    --background: 220 27% 6%;
+  /* Futuristic tech color palette for Matrix Minds */
+    --background: 240 100% 2%;
     --foreground: 210 40% 98%;
 
     --card: 220 27% 8%;
@@ -40,10 +40,10 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
     
-    /* Advanced tech gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(197, 71%, 47%));
-    --gradient-secondary: linear-gradient(135deg, hsl(220, 27%, 8%), hsl(217, 32%, 17%));
-    --gradient-hero: linear-gradient(135deg, hsl(220, 27%, 6%) 0%, hsl(217, 32%, 17%) 50%, hsl(220, 27%, 6%) 100%);
+    /* Futuristic gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%), hsl(197, 71%, 47%), hsl(270, 91%, 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(240, 100%, 3%), hsl(217, 32%, 8%), hsl(240, 100%, 5%));
+    --gradient-hero: radial-gradient(ellipse at center, hsl(240, 100%, 3%) 0%, hsl(217, 32%, 8%) 30%, hsl(240, 100%, 1%) 60%, hsl(217, 32%, 4%) 100%);
     
     /* Matrix-inspired animations */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -164,6 +164,47 @@ All colors MUST be HSL.
     0% { transform: translateY(-100%); }
     100% { transform: translateY(100vh); }
   }
+
+  @keyframes future-float {
+    0%, 100% { 
+      transform: translateY(0px) rotate(0deg); 
+      filter: hue-rotate(0deg);
+    }
+    25% { 
+      transform: translateY(-15px) rotate(1deg); 
+      filter: hue-rotate(90deg);
+    }
+    50% { 
+      transform: translateY(-25px) rotate(0deg); 
+      filter: hue-rotate(180deg);
+    }
+    75% { 
+      transform: translateY(-15px) rotate(-1deg); 
+      filter: hue-rotate(270deg);
+    }
+  }
+
+  @keyframes hologram-flicker {
+    0%, 100% { 
+      opacity: 1; 
+      filter: brightness(1) contrast(1);
+    }
+    50% { 
+      opacity: 0.8; 
+      filter: brightness(1.2) contrast(1.1);
+    }
+  }
+
+  @keyframes quantum-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(217, 91%, 60%, 0.3), inset 0 0 20px hsl(197, 71%, 47%, 0.1);
+      transform: scale(1);
+    }
+    50% { 
+      box-shadow: 0 0 40px hsl(217, 91%, 60%, 0.6), 0 0 80px hsl(197, 71%, 47%, 0.4), inset 0 0 40px hsl(197, 71%, 47%, 0.2);
+      transform: scale(1.05);
+    }
+  }
   
   .animate-float {
     animation: float 3s ease-in-out infinite;
@@ -191,6 +232,18 @@ All colors MUST be HSL.
 
   .animate-scan-line {
     animation: scan-line 4s linear infinite;
+  }
+
+  .animate-future-float {
+    animation: future-float 6s ease-in-out infinite;
+  }
+
+  .animate-hologram-flicker {
+    animation: hologram-flicker 3s ease-in-out infinite;
+  }
+
+  .animate-quantum-pulse {
+    animation: quantum-pulse 4s ease-in-out infinite;
   }
 
   /* HAR AI Gemini-like animations */

@@ -18,6 +18,12 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ["Exo 2", "ui-sans-serif", "system-ui"],
+				orbitron: ["Orbitron", "monospace"],
+				rajdhani: ["Rajdhani", "sans-serif"],
+				exo: ["Exo 2", "sans-serif"],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
