@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, X, Bot, Mic, MicOff, Volume2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Send, X, Bot, Mic, MicOff, Volume2, Sparkles, Lightbulb, Code, Shield, Users, Zap } from "lucide-react";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 
 interface Message {
@@ -11,6 +12,14 @@ interface Message {
   text: string;
   isBot: boolean;
   timestamp: Date;
+  type?: 'text' | 'suggestion';
+}
+
+interface SuggestedPrompt {
+  id: string;
+  text: string;
+  icon: any;
+  category: string;
 }
 
 const HarAI = () => {
@@ -18,7 +27,7 @@ const HarAI = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "Hello! I'm HAR AI, your intelligent assistant from Matrix Minds. I can help you with information about our AI, ML, ethical hacking services, and answer questions about S. Hareedh's expertise. How can I assist you today?",
+      text: "✨ Hello! I'm HAR AI, your intelligent assistant powered by Matrix Minds. I can help you explore our cutting-edge AI solutions, cybersecurity services, and S. Hareedh's expertise. What would you like to discover today?",
       isBot: true,
       timestamp: new Date(),
     },
@@ -26,6 +35,8 @@ const HarAI = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const recognitionRef = useRef<any>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -165,14 +176,53 @@ const HarAI = () => {
     }
   }, [isDragging, dragOffset]);
 
+  const suggestedPrompts: SuggestedPrompt[] = [
+    {
+      id: "1",
+      text: "What AI services does Matrix Minds offer?",
+      icon: Sparkles,
+      category: "AI Solutions"
+    },
+    {
+      id: "2", 
+      text: "Tell me about cybersecurity services",
+      icon: Shield,
+      category: "Security"
+    },
+    {
+      id: "3",
+      text: "Who is S. Hareedh?",
+      icon: Users,
+      category: "About"
+    },
+    {
+      id: "4",
+      text: "Show me recent projects",
+      icon: Code,
+      category: "Portfolio"
+    },
+    {
+      id: "5",
+      text: "How can I get started?",
+      icon: Zap,
+      category: "Getting Started"
+    },
+    {
+      id: "6",
+      text: "What makes Matrix Minds unique?",
+      icon: Lightbulb,
+      category: "Advantages"
+    }
+  ];
+
   const predefinedResponses: { [key: string]: string } = {
-    "services": "Matrix Minds offers cutting-edge AI & Machine Learning solutions, Ethical Hacking & Cybersecurity services, and Data Science & Analytics. We specialize in custom AI models, penetration testing, security audits, and business intelligence solutions.",
-    "hareedh": "S. Hareedh is the founder and CEO of Matrix Minds, an expert in AI, Machine Learning, Ethical Hacking, and Data Science with 50+ successful projects. He holds multiple certifications in AI, ML, cybersecurity, and has extensive experience in developing innovative tech solutions.",
-    "contact": "You can reach Matrix Minds at: Email: matrixmindsha@gmail.com, Phone: +91 9942658278. We're based in India and serve clients worldwide.",
-    "ai": "Our AI services include custom machine learning models, natural language processing, computer vision, predictive analytics, and AI automation solutions. We help businesses leverage artificial intelligence to solve complex problems and improve efficiency.",
-    "hacking": "Our ethical hacking services include penetration testing, vulnerability assessments, security audits, compliance testing, and cybersecurity consulting. We help organizations identify and fix security vulnerabilities before malicious actors can exploit them.",
-    "projects": "Matrix Minds has successfully completed 50+ projects across various industries including healthcare, finance, e-commerce, and manufacturing. Our portfolio includes AI chatbots, security assessment tools, data analytics dashboards, and custom ML solutions.",
-    "experience": "S. Hareedh has extensive experience in technology leadership, having worked on diverse projects ranging from AI-powered applications to comprehensive security assessments. His expertise spans multiple programming languages, frameworks, and cutting-edge technologies."
+    "services": "🚀 Matrix Minds offers cutting-edge AI & Machine Learning solutions, Ethical Hacking & Cybersecurity services, and Data Science & Analytics. We specialize in:\n\n• Custom AI models and automation\n• Penetration testing & security audits\n• Business intelligence solutions\n• Advanced data analytics\n\nOur solutions are designed to transform businesses and enhance security posture.",
+    "hareedh": "👨‍💻 S. Hareedh is the visionary founder and CEO of Matrix Minds. He's a certified expert in:\n\n• AI & Machine Learning\n• Ethical Hacking & Cybersecurity\n• Data Science & Analytics\n\nWith 50+ successful projects across industries, Hareedh combines technical excellence with business acumen to deliver innovative solutions that drive real results.",
+    "contact": "📞 Ready to transform your business? Reach out to Matrix Minds:\n\n📧 Email: matrixmindsha@gmail.com\n☎️ Phone: +91 9942658278\n🌍 Location: India (Serving clients worldwide)\n\nOur team responds within 24 hours to discuss your specific requirements!",
+    "ai": "🧠 Our AI services leverage cutting-edge technology:\n\n• Custom Machine Learning models\n• Natural Language Processing\n• Computer Vision solutions\n• Predictive Analytics\n• AI Automation & Chatbots\n• Deep Learning applications\n\nWe help businesses harness AI to solve complex problems, improve efficiency, and drive innovation.",
+    "hacking": "🛡️ Our ethical hacking services ensure your digital security:\n\n• Comprehensive Penetration Testing\n• Vulnerability Assessments\n• Security Audits & Compliance\n• Red Team Exercises\n• Security Consulting\n• Incident Response Planning\n\nWe identify vulnerabilities before malicious actors do, keeping your business secure.",
+    "projects": "🏆 Matrix Minds has delivered 50+ successful projects:\n\n• Healthcare AI diagnostic tools\n• Finance fraud detection systems\n• E-commerce recommendation engines\n• Manufacturing predictive maintenance\n• Security assessment platforms\n• Custom data analytics dashboards\n\nEach project showcases our commitment to innovation and excellence.",
+    "experience": "💼 S. Hareedh brings extensive technology leadership experience:\n\n• 5+ years in AI/ML development\n• Expert in multiple programming languages\n• Certified in cybersecurity frameworks\n• Published researcher in AI ethics\n• Mentor to tech startups\n• Speaker at international conferences\n\nHis vision drives Matrix Minds' mission to democratize advanced technology."
   };
 
   const speakText = (text: string) => {
@@ -202,63 +252,117 @@ const HarAI = () => {
   const getBotResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
     
-    for (const [key, response] of Object.entries(predefinedResponses)) {
-      if (message.includes(key)) {
-        return response;
+    // Enhanced keyword matching with more variations
+    const keywordMap: { [key: string]: string[] } = {
+      "services": ["service", "offer", "provide", "solution", "what do you do"],
+      "hareedh": ["hareedh", "founder", "ceo", "who is", "about hareedh"],
+      "contact": ["contact", "reach", "phone", "email", "get in touch"],
+      "ai": ["artificial intelligence", "machine learning", "ml", "ai solution", "ai service"],
+      "hacking": ["ethical hacking", "cybersecurity", "security", "penetration", "pentest"],
+      "projects": ["project", "portfolio", "work", "case study", "example"],
+      "experience": ["experience", "background", "expertise", "skill", "qualification"]
+    };
+    
+    for (const [key, keywords] of Object.entries(keywordMap)) {
+      if (keywords.some(keyword => message.includes(keyword))) {
+        return predefinedResponses[key];
       }
     }
     
-    if (message.includes("hello") || message.includes("hi")) {
-      return "Hello! Welcome to Matrix Minds. I'm here to help you learn more about our AI, ML, and cybersecurity services. What would you like to know?";
+    if (message.includes("hello") || message.includes("hi") || message.includes("hey")) {
+      return "👋 Hello! Welcome to Matrix Minds. I'm HAR AI, your intelligent assistant ready to explore our innovative AI solutions, cybersecurity services, and answer any questions about our expertise. How can I help you today?";
     }
     
-    if (message.includes("help")) {
-      return "I can help you with information about: Services, Hareedh's background, Contact details, AI solutions, Ethical hacking, Our projects, and Experience. Just ask me about any of these topics!";
+    if (message.includes("help") || message.includes("what can you do")) {
+      return "🤖 I'm here to assist you with:\n\n• 🚀 Our AI & ML services\n• 🛡️ Cybersecurity solutions\n• 👨‍💻 S. Hareedh's background\n• 📞 Contact information\n• 🏆 Project portfolio\n• 💡 Getting started guidance\n\nFeel free to ask about any of these topics or use the suggested prompts below!";
+    }
+
+    if (message.includes("unique") || message.includes("different") || message.includes("special")) {
+      return "✨ Matrix Minds stands out because:\n\n• 🎯 Personalized solutions tailored to your needs\n• 🏆 50+ successful projects across industries\n• 🔒 Security-first approach in all implementations\n• 🚀 Cutting-edge AI technologies\n• 👨‍💻 Led by certified experts\n• 🌍 Global reach with local understanding\n\nWe don't just build technology - we craft solutions that transform businesses!";
+    }
+
+    if (message.includes("started") || message.includes("begin") || message.includes("how to")) {
+      return "🚀 Getting started with Matrix Minds is easy:\n\n1. 📞 Contact us for a free consultation\n2. 💬 Discuss your specific requirements\n3. 📋 Receive a customized proposal\n4. 🤝 Begin your transformation journey\n\nReach out at matrixmindsha@gmail.com or +91 9942658278. Our team is ready to help you leverage the power of AI and security!";
     }
     
-    return "Thank you for your question! For detailed information about Matrix Minds services, please contact us directly at matrixmindsha@gmail.com or +91 9942658278. Our team will be happy to assist you with specific requirements.";
+    return "🤔 That's an interesting question! While I'd love to help with more specific details, our expert team at Matrix Minds can provide comprehensive answers tailored to your needs.\n\n📧 Contact us at: matrixmindsha@gmail.com\n📞 Call us at: +91 9942658278\n\nOur specialists will be happy to discuss your requirements in detail!";
   };
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || inputMessage;
+    if (!textToSend.trim()) return;
+
+    setShowSuggestions(false);
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputMessage,
+      text: textToSend,
       isBot: false,
       timestamp: new Date(),
     };
 
-    const botResponseText = getBotResponse(inputMessage);
-    const botResponse: Message = {
-      id: (Date.now() + 1).toString(),
-      text: botResponseText,
-      isBot: true,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage, botResponse]);
+    setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
-    
-    // Speak the bot response
-    setTimeout(() => speakText(botResponseText), 500);
+    setIsTyping(true);
+
+    // Simulate typing delay for more natural feel
+    setTimeout(() => {
+      const botResponseText = getBotResponse(textToSend);
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: botResponseText,
+        isBot: true,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, botResponse]);
+      setIsTyping(false);
+      
+      // Speak the bot response
+      setTimeout(() => speakText(botResponseText.replace(/[🚀🛡️👨‍💻📞🧠🏆💼✨🤖👋🎯🔒🌍💬📋🤝📧☎️🤔]/g, '')), 500);
+    }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+  };
+
+  const handleSuggestedPrompt = (prompt: string) => {
+    handleSendMessage(prompt);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
+
+  const TypingIndicator = () => (
+    <div className="flex justify-start mb-4">
+      <div className="bg-muted p-3 rounded-lg max-w-[80%]">
+        <div className="flex items-center gap-1">
+          <div className="flex gap-1">
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          </div>
+          <span className="text-xs text-muted-foreground ml-2">HAR AI is typing...</span>
+        </div>
+      </div>
+    </div>
+  );
 
   if (!isOpen) {
     return (
       <div className="fixed bottom-14 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
-          className="rounded-full w-16 h-16 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg hover:shadow-xl transition-all duration-300 p-2"
+          className="rounded-full w-16 h-16 bg-gradient-to-r from-primary via-purple-500 to-pink-500 hover:from-primary/90 hover:via-purple-500/90 hover:to-pink-500/90 shadow-lg hover:shadow-2xl transition-all duration-300 p-2 animate-pulse-glow"
           size="lg"
         >
-          <img src={harAIAvatar} alt="HAR AI" className="w-full h-full object-contain" />
+          <div className="relative w-full h-full">
+            <img src={harAIAvatar} alt="HAR AI" className="w-full h-full object-contain" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+              <Sparkles className="w-2 h-2 text-white" />
+            </div>
+          </div>
         </Button>
       </div>
     );
@@ -273,27 +377,39 @@ const HarAI = () => {
           : {}
       }
     >
-      <Card className="w-96 h-[500px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <Card className="w-96 h-[600px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden">
         <CardHeader 
-          className={`pb-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-t-lg cursor-move select-none ${isLongPressing ? 'bg-opacity-80' : ''}`}
+          className={`pb-3 bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-white rounded-t-lg cursor-move select-none relative overflow-hidden ${isLongPressing ? 'bg-opacity-80' : ''}`}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <img src={harAIAvatar} alt="HAR AI" className="w-6 h-6 object-contain" />
-              <CardTitle className="text-lg">HAR AI Assistant</CardTitle>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img src={harAIAvatar} alt="HAR AI" className="w-8 h-8 object-contain" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              </div>
+              <div>
+                <CardTitle className="text-lg font-bold">HAR AI</CardTitle>
+                <p className="text-xs text-white/80">Intelligent Assistant</p>
+              </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 transition-all duration-200"
             >
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-sm text-white/90">Powered by Matrix Minds • Long press header to move</p>
+          <div className="flex items-center gap-2 mt-2 relative z-10">
+            <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Powered by Matrix Minds
+            </Badge>
+          </div>
         </CardHeader>
         
         <CardContent className="p-0 h-full flex flex-col">
@@ -302,17 +418,18 @@ const HarAI = () => {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.isBot ? "justify-start" : "justify-end"}`}
+                  className={`flex ${message.isBot ? "justify-start" : "justify-end"} animate-fade-in`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[85%] p-3 rounded-2xl transition-all duration-200 ${
                       message.isBot
-                        ? "bg-muted text-foreground"
-                        : "bg-primary text-primary-foreground"
+                        ? "bg-muted text-foreground rounded-bl-md shadow-sm"
+                        : "bg-gradient-to-r from-primary to-purple-600 text-primary-foreground rounded-br-md shadow-md"
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
-                    <p className="text-xs opacity-70 mt-1">
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
+                    <p className="text-xs opacity-70 mt-2 flex items-center gap-1">
+                      {message.isBot && <Bot className="w-3 h-3" />}
                       {message.timestamp.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -321,35 +438,91 @@ const HarAI = () => {
                   </div>
                 </div>
               ))}
+              {isTyping && <TypingIndicator />}
+              
+              {showSuggestions && messages.length <= 1 && (
+                <div className="space-y-3 animate-fade-in">
+                  <p className="text-sm text-muted-foreground text-center font-medium">
+                    ✨ Quick suggestions to get started:
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {suggestedPrompts.slice(0, 4).map((prompt) => {
+                      const IconComponent = prompt.icon;
+                      return (
+                        <Button
+                          key={prompt.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSuggestedPrompt(prompt.text)}
+                          className="justify-start h-auto p-3 text-left hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 group"
+                        >
+                          <IconComponent className="w-4 h-4 mr-2 text-primary group-hover:scale-110 transition-transform" />
+                          <div>
+                            <p className="text-sm font-medium">{prompt.text}</p>
+                            <p className="text-xs text-muted-foreground">{prompt.category}</p>
+                          </div>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 justify-center pt-2">
+                    {suggestedPrompts.slice(4).map((prompt) => {
+                      const IconComponent = prompt.icon;
+                      return (
+                        <Button
+                          key={prompt.id}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSuggestedPrompt(prompt.text)}
+                          className="text-xs h-auto py-2 px-3 hover:bg-primary/10 transition-all duration-200"
+                        >
+                          <IconComponent className="w-3 h-3 mr-1" />
+                          {prompt.category}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
           
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type or click mic to speak..."
-                className="flex-1"
-              />
-              {speechSupported && (
-                <Button
-                  onClick={isListening ? stopListening : startListening}
-                  size="sm"
-                  variant={isListening ? "destructive" : "outline"}
-                  className={isListening ? "animate-pulse" : ""}
-                >
-                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                </Button>
-              )}
-              <Button onClick={handleSendMessage} size="sm" disabled={!inputMessage.trim()}>
+          <div className="p-4 border-t bg-background/50">
+            <div className="flex gap-2 items-end">
+              <div className="flex-1 relative">
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me anything about Matrix Minds..."
+                  className="pr-12 rounded-full border-2 focus:border-primary transition-all duration-200"
+                  disabled={isTyping}
+                />
+                {speechSupported && (
+                  <Button
+                    onClick={isListening ? stopListening : startListening}
+                    size="sm"
+                    variant="ghost"
+                    className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 p-0 ${isListening ? "text-red-500 animate-pulse" : "text-muted-foreground"}`}
+                    disabled={isTyping}
+                  >
+                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </Button>
+                )}
+              </div>
+              <Button 
+                onClick={() => handleSendMessage()} 
+                size="sm" 
+                disabled={!inputMessage.trim() || isTyping}
+                className="rounded-full h-10 w-10 p-0 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg transition-all duration-200"
+              >
                 <Send className="w-4 h-4" />
               </Button>
             </div>
             {speechSupported && (
               <p className="text-xs text-muted-foreground mt-2 text-center">
-                {isListening ? "Listening... Speak now" : "Click the microphone to speak"}
+                {isListening ? "🎤 Listening... Speak now" : "💬 Type or use voice input"}
               </p>
             )}
           </div>
