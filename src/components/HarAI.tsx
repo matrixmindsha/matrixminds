@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, X, Bot, Mic, MicOff, Volume2, Sparkles, Lightbulb, Code, Shield, Users, Zap } from "lucide-react";
+import { MessageCircle, Send, X, Bot, Mic, MicOff, Volume2, Sparkles, Lightbulb, Code, Shield, Users, Zap, Square, StopCircle } from "lucide-react";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 
 interface Message {
@@ -37,6 +37,8 @@ const HarAI = () => {
   const [speechSupported, setSpeechSupported] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceCommands, setVoiceCommands] = useState(true);
   const recognitionRef = useRef<any>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -50,27 +52,51 @@ const HarAI = () => {
     if (SpeechRecognition) {
       setSpeechSupported(true);
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.continuous = true;
+      recognition.interimResults = true;
       recognition.lang = 'en-US';
 
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputMessage(transcript);
-        setIsListening(false);
+      recognition.onstart = () => {
+        setIsListening(true);
+        setIsRecording(true);
       };
 
-      recognition.onerror = () => {
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        
+        setInputMessage(transcript);
+        
+        // Check for voice commands
+        if (voiceCommands) {
+          const command = transcript.toLowerCase().trim();
+          if (command.includes('send message') || command.includes('send')) {
+            recognition.stop();
+            setTimeout(() => handleSendMessage(), 500);
+          } else if (command.includes('clear') || command.includes('reset')) {
+            setInputMessage('');
+          } else if (command.includes('stop listening')) {
+            recognition.stop();
+          }
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        setIsRecording(false);
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        setIsRecording(false);
       };
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [voiceCommands]);
 
   // Long press and dragging functionality
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -237,16 +263,22 @@ const HarAI = () => {
 
   const startListening = () => {
     if (recognitionRef.current && speechSupported) {
-      setIsListening(true);
-      recognitionRef.current.start();
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Failed to start speech recognition:', error);
+      }
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
-      setIsListening(false);
     }
+  };
+
+  const toggleVoiceCommands = () => {
+    setVoiceCommands(!voiceCommands);
   };
 
   const getBotResponse = (userMessage: string): string => {
@@ -328,6 +360,13 @@ const HarAI = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleTextareaKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -488,43 +527,117 @@ const HarAI = () => {
             </div>
           </ScrollArea>
           
-          <div className="p-4 border-t bg-background/50">
-            <div className="flex gap-2 items-end">
-              <div className="flex-1 relative">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask me anything about Matrix Minds..."
-                  className="pr-12 rounded-full border-2 focus:border-primary transition-all duration-200"
-                  disabled={isTyping}
-                />
-                {speechSupported && (
-                  <Button
-                    onClick={isListening ? stopListening : startListening}
-                    size="sm"
-                    variant="ghost"
-                    className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 p-0 ${isListening ? "text-red-500 animate-pulse" : "text-muted-foreground"}`}
-                    disabled={isTyping}
-                  >
-                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  </Button>
-                )}
-              </div>
-              <Button 
-                onClick={() => handleSendMessage()} 
-                size="sm" 
-                disabled={!inputMessage.trim() || isTyping}
-                className="rounded-full h-10 w-10 p-0 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg transition-all duration-200"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="p-4 border-t bg-background/50 space-y-3">
+            {/* Voice Commands Toggle */}
             {speechSupported && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                {isListening ? "🎤 Listening... Speak now" : "💬 Type or use voice input"}
-              </p>
+              <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Voice Commands</span>
+                </div>
+                <Button
+                  onClick={toggleVoiceCommands}
+                  size="sm"
+                  variant={voiceCommands ? "default" : "outline"}
+                  className="h-6 px-2 text-xs"
+                >
+                  {voiceCommands ? "ON" : "OFF"}
+                </Button>
+              </div>
             )}
+            
+            {/* Enhanced Input Area */}
+            <div className="space-y-2">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 relative">
+                  <Textarea
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyDown={handleTextareaKeyPress}
+                    placeholder="Ask me anything about Matrix Minds... (Press Enter to send, Shift+Enter for new line)"
+                    className="min-h-[60px] max-h-[120px] resize-none border-2 focus:border-primary transition-all duration-200 pr-12"
+                    disabled={isTyping}
+                  />
+                  
+                  {/* Voice Recording Button */}
+                  {speechSupported && (
+                    <div className="absolute right-2 top-2 flex flex-col gap-1">
+                      <Button
+                        onClick={isListening ? stopListening : startListening}
+                        size="sm"
+                        variant="ghost"
+                        className={`rounded-full h-8 w-8 p-0 transition-all duration-300 ${
+                          isListening 
+                            ? "text-red-500 bg-red-50 animate-pulse hover:bg-red-100" 
+                            : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                        }`}
+                        disabled={isTyping}
+                      >
+                        {isListening ? (
+                          <div className="flex items-center justify-center">
+                            <StopCircle className="w-4 h-4" />
+                          </div>
+                        ) : (
+                          <Mic className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <Button 
+                  onClick={() => handleSendMessage()} 
+                  size="sm" 
+                  disabled={!inputMessage.trim() || isTyping}
+                  className="rounded-full h-12 w-12 p-0 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg transition-all duration-200 hover:scale-105"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+              
+              {/* Status Indicators */}
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  {speechSupported && (
+                    <span className={`flex items-center gap-1 ${isListening ? 'text-red-500' : ''}`}>
+                      {isListening ? (
+                        <>
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                          Listening... {isRecording && "Say 'send' to send message"}
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="w-3 h-3" />
+                          Voice input ready
+                        </>
+                      )}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {voiceCommands && speechSupported && (
+                    <Badge variant="secondary" className="text-xs">
+                      <Sparkles className="w-2 h-2 mr-1" />
+                      Commands: ON
+                    </Badge>
+                  )}
+                  <span>{inputMessage.length}/1000</span>
+                </div>
+              </div>
+              
+              {/* Voice Commands Help */}
+              {speechSupported && voiceCommands && isListening && (
+                <div className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Voice Commands:</p>
+                  <div className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
+                    <div>• Say "send" or "send message" to send</div>
+                    <div>• Say "clear" to clear input</div>
+                    <div>• Say "stop listening" to stop recording</div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
