@@ -123,7 +123,7 @@ const TechBackground = () => {
       ref={canvasRef}
       className="fixed inset-0 z-0 pointer-events-none"
       style={{ 
-        background: 'radial-gradient(ellipse at center, hsl(240, 100%, 3%) 0%, hsl(217, 32%, 8%) 25%, hsl(240, 100%, 2%) 50%, hsl(217, 32%, 6%) 75%, hsl(240, 100%, 1%) 100%)',
+        background: 'radial-gradient(ellipse at center, hsl(220, 30%, 15%) 0%, hsl(217, 40%, 25%) 25%, hsl(240, 35%, 20%) 50%, hsl(217, 45%, 30%) 75%, hsl(240, 30%, 18%) 100%)',
       }}
     />
   );
