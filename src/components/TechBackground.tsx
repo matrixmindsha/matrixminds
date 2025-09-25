@@ -119,13 +119,46 @@ const TechBackground = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none"
-      style={{ 
-        background: 'radial-gradient(ellipse at center, hsl(220, 30%, 15%) 0%, hsl(217, 40%, 25%) 25%, hsl(240, 35%, 20%) 50%, hsl(217, 45%, 30%) 75%, hsl(240, 30%, 18%) 100%)',
-      }}
-    />
+    <div className="fixed inset-0 z-0 pointer-events-none">
+      {/* Futuristic circular tech background inspired by uploaded images */}
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{
+          background: `
+            radial-gradient(circle at 20% 30%, rgba(0, 191, 255, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(0, 123, 255, 0.25) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+            conic-gradient(from 0deg at 50% 50%, 
+              hsl(210, 100%, 10%) 0deg,
+              hsl(220, 90%, 15%) 90deg,
+              hsl(240, 80%, 20%) 180deg,
+              hsl(260, 70%, 15%) 270deg,
+              hsl(210, 100%, 10%) 360deg
+            )
+          `
+        }}
+      />
+      
+      {/* Animated tech circles */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 border border-primary/20 rounded-full animate-[spin_20s_linear_infinite]" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 border border-accent/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 border border-blue-500/25 rounded-full animate-[spin_25s_linear_infinite]" />
+      </div>
+      
+      {/* Floating tech elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-primary rounded-full animate-float" />
+        <div className="absolute top-40 right-20 w-1 h-1 bg-accent rounded-full animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-blue-400 rounded-full animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-20 right-1/3 w-2 h-2 bg-primary rounded-full animate-float" style={{ animationDelay: '3s' }} />
+      </div>
+      
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 mix-blend-screen"
+      />
+    </div>
   );
 };
 

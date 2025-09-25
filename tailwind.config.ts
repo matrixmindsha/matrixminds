@@ -131,7 +131,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'tech-pulse': 'tech-pulse 2s ease-in-out infinite',
 				'matrix-rain': 'matrix-rain 3s linear infinite',
-				'hologram': 'hologram 3s ease-in-out infinite'
+				'hologram': 'hologram 3s ease-in-out infinite',
+				'float': 'float 6s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
