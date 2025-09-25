@@ -21,8 +21,8 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             <img src={logo} alt="Matrix Minds" className="h-12 w-12" />
             <div>
-              <h1 className="text-xl font-bold text-foreground">MATRIX MINDS</h1>
-              <p className="text-xs text-muted-foreground">Advanced AI Solutions</p>
+              <h1 className="font-orbitron text-xl font-black text-foreground">MATRIX MINDS</h1>
+              <p className="font-rajdhani text-xs text-primary font-semibold">🌍 Global AI Solutions</p>
             </div>
           </div>
 
@@ -62,8 +62,9 @@ const Header = () => {
               variant="hero" 
               size="sm"
               onClick={() => scrollToSection('contact')}
+              className="font-orbitron font-bold animate-quantum-pulse"
             >
-              Get Started
+              🆓 FREE CONSULT
             </Button>
           </nav>
 

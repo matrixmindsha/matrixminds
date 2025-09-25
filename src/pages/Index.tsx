@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import HarAI from "@/components/HarAI";
+import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
 import { 
   LazyHeroSection, 
@@ -49,7 +49,7 @@ const Index = () => {
           </Suspense>
         </main>
         <Footer />
-        <HarAI />
+        <ChatBox />
       </div>
     </div>
   );
