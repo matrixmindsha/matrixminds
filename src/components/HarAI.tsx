@@ -463,20 +463,30 @@ const HarAI = () => {
 
   return (
     <div 
-      className={`fixed z-50 ${position.x === 0 && position.y === 0 ? 'bottom-14 right-6' : ''}`}
+      className={`fixed z-50 transition-all duration-300 ${position.x === 0 && position.y === 0 ? 'bottom-14 right-6' : ''}`}
       style={
         position.x !== 0 || position.y !== 0
-          ? { left: `${position.x}px`, top: `${position.y}px` }
+          ? { 
+              left: `${position.x}px`, 
+              top: `${position.y}px`,
+              transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+              boxShadow: isDragging ? '0 20px 40px rgba(0,0,0,0.3)' : 'none'
+            }
           : {}
       }
     >
-      <Card className="w-96 h-[600px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden">
+      <Card className="w-96 h-[600px] shadow-2xl border-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden transition-all duration-300 hover:shadow-3xl">
         <CardHeader 
-          className={`pb-3 bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-white rounded-t-lg cursor-move select-none relative overflow-hidden ${isLongPressing ? 'bg-opacity-80' : ''}`}
+          className={`pb-3 bg-gradient-to-r from-primary via-purple-500 to-pink-500 text-white rounded-t-lg cursor-move select-none relative overflow-hidden transition-all duration-200 ${isLongPressing ? 'bg-opacity-80 scale-105' : ''} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+          
+          {/* Drag indicator */}
+          <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+            <div className="w-8 h-1 bg-white/40 rounded-full"></div>
+          </div>
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3">
               <div className="relative">

@@ -267,34 +267,70 @@ const ChatBox = () => {
 
   return (
     <div 
-      className="fixed bottom-20 right-6 z-50 w-96"
+      className="fixed bottom-20 right-6 z-50 w-96 transition-all duration-300"
       style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        cursor: isDragging ? 'grabbing' : 'default'
+        transform: `translate(${position.x}px, ${position.y}px) ${isDragging ? 'scale(1.02)' : 'scale(1)'}`,
+        cursor: isDragging ? 'grabbing' : 'default',
+        filter: isDragging ? 'drop-shadow(0 20px 40px rgba(0,0,0,0.3))' : 'none'
       }}
       onMouseDown={handleMouseDown}
     >
-      <Card ref={cardRef} className="h-[600px] shadow-2xl border border-primary/30 bg-background/95 backdrop-blur-xl overflow-hidden"
-            style={{ userSelect: isDragging ? 'none' : 'auto' }}>
-        <div className="drag-handle flex items-center justify-between p-4 bg-gradient-to-r from-primary via-accent to-primary text-white border-b border-primary/30 cursor-grab active:cursor-grabbing">
-          <div className="flex items-center gap-3 pointer-events-none">
+      <Card ref={cardRef} className="h-[600px] shadow-2xl border border-primary/30 bg-background/95 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:shadow-3xl"
+            style={{ 
+              userSelect: isDragging ? 'none' : 'auto',
+              borderColor: isDragging ? 'hsl(var(--primary))' : 'hsl(var(--primary) / 0.3)'
+            }}>
+        <div className={`drag-handle flex items-center justify-between p-4 bg-gradient-to-r from-primary via-accent to-primary text-white border-b border-primary/30 transition-all duration-200 ${isDragging ? 'cursor-grabbing bg-opacity-90' : 'cursor-grab'}`}>
+          
+          {/* Drag indicator */}
+          <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+            <div className="w-8 h-1 bg-white/40 rounded-full"></div>
+          </div>
+          
+          <div className="flex items-center gap-3 pointer-events-none mt-2">
             <div className="relative">
-              <img src={harAIAvatar} alt="AI Assistant" className="w-8 h-8 rounded-full" />
+              <img src={harAIAvatar} alt="AI Assistant" className="w-8 h-8 rounded-full border-2 border-white/20" />
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
             <div>
               <h3 className="font-semibold text-sm">Matrix Minds AI</h3>
-              <p className="text-xs opacity-90">Online • Ready to help</p>
+              <p className="text-xs opacity-90">
+                {isDragging ? "🤏 Dragging..." : "Online • Ready to help"}
+              </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="text-white hover:bg-white/20 h-8 w-8 p-0 pointer-events-auto"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          
+          <div className="flex items-center gap-2 mt-2">
+            {/* Position reset button */}
+            {(position.x !== 0 || position.y !== 0) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPosition({ x: 0, y: 0 })}
+                className="text-white hover:bg-white/20 h-8 w-8 p-0 pointer-events-auto"
+                title="Reset position"
+              >
+                <div className="w-3 h-3 border border-white rounded"></div>
+              </Button>
+            )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0 pointer-events-auto"
+              title="Close chat"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          {/* Drag instruction hint */}
+          {!isDragging && (position.x === 0 && position.y === 0) && (
+            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 text-xs opacity-75">
+              Drag to move around
+            </div>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">

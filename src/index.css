@@ -328,4 +328,16 @@ All colors MUST be HSL.
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
   }
+
+  /* Enhanced drag animations */
+  .drag-active {
+    transform: scale(1.02) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+    border-color: hsl(var(--primary)) !important;
+    transition: all 0.2s ease-out !important;
+  }
+
+  .drag-handle:hover {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--accent) / 0.9)) !important;
+  }
 }
