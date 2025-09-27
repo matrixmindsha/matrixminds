@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import futuristicBg from '@/assets/futuristic-tech-bg.jpg';
 
 const TechBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -120,20 +121,31 @@ const TechBackground = () => {
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
-      {/* Futuristic circular tech background inspired by uploaded images */}
+      {/* Futuristic tech background image */}
       <div 
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage: `url(${futuristicBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      
+      {/* Overlay gradients to blend with the image */}
+      <div 
+        className="absolute inset-0 opacity-40"
         style={{
           background: `
-            radial-gradient(circle at 20% 30%, rgba(0, 191, 255, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(0, 123, 255, 0.25) 0%, transparent 50%),
-            radial-gradient(circle at 40% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
-            conic-gradient(from 0deg at 50% 50%, 
-              hsl(210, 100%, 10%) 0deg,
-              hsl(220, 90%, 15%) 90deg,
-              hsl(240, 80%, 20%) 180deg,
-              hsl(260, 70%, 15%) 270deg,
-              hsl(210, 100%, 10%) 360deg
+            radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.4) 0%, transparent 50%),
+            radial-gradient(circle at 70% 60%, rgba(34, 197, 94, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 50% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%),
+            linear-gradient(135deg, 
+              rgba(217, 91, 60, 0.1) 0%,
+              rgba(197, 71, 47, 0.2) 25%,
+              rgba(59, 130, 246, 0.2) 50%,
+              rgba(168, 85, 247, 0.1) 75%,
+              rgba(34, 197, 94, 0.1) 100%
             )
           `
         }}
@@ -144,6 +156,7 @@ const TechBackground = () => {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 border border-primary/20 rounded-full animate-[spin_20s_linear_infinite]" />
         <div className="absolute top-1/3 right-1/4 w-64 h-64 border border-accent/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
         <div className="absolute bottom-1/4 left-1/3 w-80 h-80 border border-blue-500/25 rounded-full animate-[spin_25s_linear_infinite]" />
+        <div className="absolute top-1/2 left-1/2 w-48 h-48 border border-purple-400/20 rounded-full animate-[spin_30s_linear_infinite]" />
       </div>
       
       {/* Floating tech elements */}
@@ -152,6 +165,7 @@ const TechBackground = () => {
         <div className="absolute top-40 right-20 w-1 h-1 bg-accent rounded-full animate-float" style={{ animationDelay: '1s' }} />
         <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-blue-400 rounded-full animate-float" style={{ animationDelay: '2s' }} />
         <div className="absolute bottom-20 right-1/3 w-2 h-2 bg-primary rounded-full animate-float" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-1/3 left-1/2 w-1 h-1 bg-purple-400 rounded-full animate-float" style={{ animationDelay: '4s' }} />
       </div>
       
       <canvas
