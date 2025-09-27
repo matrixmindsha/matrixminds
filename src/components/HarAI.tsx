@@ -211,33 +211,45 @@ const HarAI = () => {
     },
     {
       id: "2", 
-      text: "Tell me about cybersecurity services",
+      text: "What is cybersecurity?",
       icon: Shield,
-      category: "Security"
+      category: "Security Knowledge"
     },
     {
       id: "3",
+      text: "What is ethical hacking?",
+      icon: Code,
+      category: "Security Knowledge"
+    },
+    {
+      id: "4",
+      text: "Tell me about penetration testing",
+      icon: Shield,
+      category: "Security Knowledge"
+    },
+    {
+      id: "5",
       text: "Who is S. Hareedh?",
       icon: Users,
       category: "About"
     },
     {
-      id: "4",
-      text: "Show me recent projects",
-      icon: Code,
-      category: "Portfolio"
-    },
-    {
-      id: "5",
+      id: "6",
       text: "How can I get started?",
       icon: Zap,
       category: "Getting Started"
     },
     {
-      id: "6",
-      text: "What makes Matrix Minds unique?",
-      icon: Lightbulb,
-      category: "Advantages"
+      id: "7",
+      text: "What is network security?",
+      icon: Shield,
+      category: "Security Knowledge"
+    },
+    {
+      id: "8",
+      text: "Explain vulnerability assessment",
+      icon: Shield,
+      category: "Security Knowledge"
     }
   ];
 
@@ -248,7 +260,20 @@ const HarAI = () => {
     "ai": "🧠 Our AI services leverage cutting-edge technology:\n\n• Custom Machine Learning models\n• Natural Language Processing\n• Computer Vision solutions\n• Predictive Analytics\n• AI Automation & Chatbots\n• Deep Learning applications\n\nWe help businesses harness AI to solve complex problems, improve efficiency, and drive innovation.",
     "hacking": "🛡️ Our ethical hacking services ensure your digital security:\n\n• Comprehensive Penetration Testing\n• Vulnerability Assessments\n• Security Audits & Compliance\n• Red Team Exercises\n• Security Consulting\n• Incident Response Planning\n\nWe identify vulnerabilities before malicious actors do, keeping your business secure.",
     "projects": "🏆 Matrix Minds has delivered 50+ successful projects:\n\n• Healthcare AI diagnostic tools\n• Finance fraud detection systems\n• E-commerce recommendation engines\n• Manufacturing predictive maintenance\n• Security assessment platforms\n• Custom data analytics dashboards\n\nEach project showcases our commitment to innovation and excellence.",
-    "experience": "💼 S. Hareedh brings extensive technology leadership experience:\n\n• 5+ years in AI/ML development\n• Expert in multiple programming languages\n• Certified in cybersecurity frameworks\n• Published researcher in AI ethics\n• Mentor to tech startups\n• Speaker at international conferences\n\nHis vision drives Matrix Minds' mission to democratize advanced technology."
+    "experience": "💼 S. Hareedh brings extensive technology leadership experience:\n\n• 5+ years in AI/ML development\n• Expert in multiple programming languages\n• Certified in cybersecurity frameworks\n• Published researcher in AI ethics\n• Mentor to tech startups\n• Speaker at international conferences\n\nHis vision drives Matrix Minds' mission to democratize advanced technology.",
+    
+    // General Knowledge Base - Cybersecurity & Ethical Hacking
+    "cybersecurity_definition": "🔒 **Cybersecurity** is the practice of protecting systems, networks, and programs from digital attacks. It involves:\n\n• **Network Security**: Protecting computer networks from intruders\n• **Information Security**: Protecting data integrity and privacy\n• **Application Security**: Keeping software and devices free of threats\n• **Operational Security**: Handling and protecting data assets\n• **Disaster Recovery**: Responding to cyber incidents and maintaining business continuity\n• **End-user Education**: Teaching people about security best practices\n\nCybersecurity is essential in today's digital world where cyber threats are constantly evolving.",
+    
+    "ethical_hacking": "⚡ **Ethical Hacking** (White Hat Hacking) is the authorized practice of bypassing system security to identify potential data breaches and threats in a network.\n\n**Key Principles:**\n• **Authorization**: Always have explicit permission\n• **Documentation**: Report all findings responsibly\n• **No Damage**: Don't cause harm to systems\n• **Privacy**: Respect data confidentiality\n\n**Common Techniques:**\n• Penetration Testing\n• Vulnerability Assessments\n• Social Engineering Tests\n• Network Scanning\n• Web Application Testing\n\nEthical hackers help organizations strengthen their security posture by finding vulnerabilities before malicious actors do.",
+    
+    "penetration_testing": "🎯 **Penetration Testing** is a simulated cyber attack against your computer system to check for exploitable vulnerabilities.\n\n**Types of Pen Testing:**\n• **Black Box**: No prior knowledge of the system\n• **White Box**: Full knowledge of the system\n• **Gray Box**: Partial knowledge of the system\n\n**Phases:**\n1. **Planning & Reconnaissance**: Gathering intel\n2. **Scanning**: Understanding target responses\n3. **Gaining Access**: Exploiting vulnerabilities\n4. **Maintaining Access**: Seeing if persistence is possible\n5. **Analysis & Reporting**: Compiling results\n\nPen testing helps identify security weaknesses before attackers do.",
+    
+    "vulnerability_assessment": "🔍 **Vulnerability Assessment** is the process of identifying, quantifying, and prioritizing vulnerabilities in a system.\n\n**Key Components:**\n• **Asset Identification**: Cataloging all system assets\n• **Vulnerability Scanning**: Using automated tools\n• **Risk Assessment**: Evaluating potential impact\n• **Reporting**: Documenting findings and recommendations\n• **Remediation**: Providing solutions to fix vulnerabilities\n\n**Tools Used:**\n• Nessus, OpenVAS, Nmap\n• Burp Suite, OWASP ZAP\n• Metasploit, Wireshark\n\nRegular vulnerability assessments are crucial for maintaining strong security posture.",
+    
+    "network_security": "🌐 **Network Security** involves protecting the integrity, confidentiality, and accessibility of computer networks and data.\n\n**Core Elements:**\n• **Firewalls**: Control network traffic\n• **IDS/IPS**: Intrusion Detection/Prevention Systems\n• **VPN**: Secure remote access\n• **Network Access Control**: Managing device access\n• **Network Segmentation**: Isolating critical systems\n\n**Common Threats:**\n• DDoS Attacks\n• Man-in-the-Middle Attacks\n• Packet Sniffing\n• Network Reconnaissance\n• Unauthorized Access\n\nStrong network security is the foundation of overall cybersecurity strategy.",
+    
+    "information_security": "📊 **Information Security** (InfoSec) protects information and information systems from unauthorized access, use, disclosure, disruption, modification, or destruction.\n\n**CIA Triad:**\n• **Confidentiality**: Ensuring information is accessible only to authorized users\n• **Integrity**: Maintaining accuracy and completeness of data\n• **Availability**: Ensuring authorized users have access when needed\n\n**Key Areas:**\n• Data Classification\n• Access Controls\n• Encryption\n• Data Loss Prevention\n• Incident Response\n• Compliance Management\n\nInfoSec is critical for protecting sensitive business and personal data."
   };
 
   const speakText = (text: string) => {
@@ -284,29 +309,58 @@ const HarAI = () => {
   const getBotResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
     
-    // Enhanced keyword matching with more variations
+    // Enhanced keyword matching with general knowledge
     const keywordMap: { [key: string]: string[] } = {
       "services": ["service", "offer", "provide", "solution", "what do you do"],
       "hareedh": ["hareedh", "founder", "ceo", "who is", "about hareedh"],
       "contact": ["contact", "reach", "phone", "email", "get in touch"],
       "ai": ["artificial intelligence", "machine learning", "ml", "ai solution", "ai service"],
-      "hacking": ["ethical hacking", "cybersecurity", "security", "penetration", "pentest"],
+      "hacking": ["ethical hacking", "white hat", "pen test", "penetration test"],
       "projects": ["project", "portfolio", "work", "case study", "example"],
-      "experience": ["experience", "background", "expertise", "skill", "qualification"]
+      "experience": ["experience", "background", "expertise", "skill", "qualification"],
+      
+      // General Knowledge Keywords
+      "cybersecurity_definition": ["what is cybersecurity", "define cybersecurity", "cybersecurity definition", "cybersecurity meaning", "cyber security"],
+      "ethical_hacking": ["what is ethical hacking", "define ethical hacking", "ethical hacking definition", "white hat hacking", "authorized hacking"],
+      "penetration_testing": ["what is penetration testing", "pen testing", "pentest", "penetration test definition", "security testing"],
+      "vulnerability_assessment": ["vulnerability assessment", "vulnerability scan", "security assessment", "vuln assessment"],
+      "network_security": ["network security", "network protection", "network safety", "secure network"],
+      "information_security": ["information security", "infosec", "data security", "data protection"]
     };
     
+    // Check for exact matches first for general knowledge
     for (const [key, keywords] of Object.entries(keywordMap)) {
       if (keywords.some(keyword => message.includes(keyword))) {
-        return predefinedResponses[key];
+        if (predefinedResponses[key]) {
+          return predefinedResponses[key];
+        }
       }
     }
+
+    // Specific cybersecurity terms
+    if (message.includes("firewall") || message.includes("intrusion detection") || message.includes("ids") || message.includes("ips")) {
+      return "🔥 **Firewalls & IDS/IPS** are critical network security components:\n\n**Firewall:**\n• Controls incoming/outgoing network traffic\n• Acts as a barrier between trusted and untrusted networks\n• Can be hardware or software-based\n\n**IDS (Intrusion Detection System):**\n• Monitors network traffic for suspicious activity\n• Alerts administrators of potential threats\n\n**IPS (Intrusion Prevention System):**\n• Actively blocks detected threats\n• Combines monitoring with automated response\n\nThese tools form the foundation of network defense strategies.";
+    }
+
+    if (message.includes("malware") || message.includes("virus") || message.includes("trojan") || message.includes("ransomware")) {
+      return "🦠 **Malware** (Malicious Software) includes various types of harmful programs:\n\n**Common Types:**\n• **Virus**: Replicates and spreads to other files\n• **Trojan**: Disguised as legitimate software\n• **Ransomware**: Encrypts files and demands payment\n• **Spyware**: Secretly monitors user activity\n• **Adware**: Displays unwanted advertisements\n• **Rootkit**: Hides malicious activity from detection\n\n**Protection Methods:**\n• Antivirus software\n• Regular system updates\n• Safe browsing practices\n• Email security\n• User education\n\nStaying informed about malware threats is crucial for cybersecurity.";
+    }
+
+    if (message.includes("social engineering") || message.includes("phishing") || message.includes("social attack")) {
+      return "🎭 **Social Engineering** attacks manipulate people to divulge confidential information:\n\n**Common Techniques:**\n• **Phishing**: Fraudulent emails/websites\n• **Pretexting**: Creating false scenarios\n• **Baiting**: Offering something enticing\n• **Quid Pro Quo**: Offering service in exchange for info\n• **Tailgating**: Following authorized persons into secure areas\n\n**Prevention:**\n• Security awareness training\n• Verification procedures\n• Healthy skepticism\n• Multi-factor authentication\n• Clear security policies\n\nHuman psychology is often the weakest link in security chains.";
+    }
+
+    if (message.includes("encryption") || message.includes("cryptography") || message.includes("crypto")) {
+      return "🔐 **Encryption** converts readable data into coded form to prevent unauthorized access:\n\n**Types:**\n• **Symmetric**: Same key for encryption/decryption\n• **Asymmetric**: Public/private key pairs\n• **Hashing**: One-way transformation\n\n**Common Algorithms:**\n• AES (Advanced Encryption Standard)\n• RSA (Rivest-Shamir-Adleman)\n• SHA (Secure Hash Algorithm)\n\n**Applications:**\n• Secure communications\n• Data storage protection\n• Digital signatures\n• Authentication\n\nEncryption is fundamental to modern cybersecurity and privacy protection.";
+    }
     
+    // General conversation handlers
     if (message.includes("hello") || message.includes("hi") || message.includes("hey")) {
-      return "👋 Hello! Welcome to Matrix Minds. I'm HAR AI, your intelligent assistant ready to explore our innovative AI solutions, cybersecurity services, and answer any questions about our expertise. How can I help you today?";
+      return "👋 Hello! Welcome to Matrix Minds. I'm HAR AI, your intelligent assistant ready to explore our innovative AI solutions, cybersecurity services, and answer general questions about technology and security. How can I help you today?";
     }
     
     if (message.includes("help") || message.includes("what can you do")) {
-      return "🤖 I'm here to assist you with:\n\n• 🚀 Our AI & ML services\n• 🛡️ Cybersecurity solutions\n• 👨‍💻 S. Hareedh's background\n• 📞 Contact information\n• 🏆 Project portfolio\n• 💡 Getting started guidance\n\nFeel free to ask about any of these topics or use the suggested prompts below!";
+      return "🤖 I can help you with:\n\n**Matrix Minds Services:**\n• 🚀 AI & ML solutions\n• 🛡️ Cybersecurity services\n• 👨‍💻 About our team\n• 📞 Contact information\n\n**General Knowledge:**\n• Cybersecurity concepts\n• Ethical hacking explanations\n• Network security basics\n• Information security principles\n\nAsk me anything about these topics!";
     }
 
     if (message.includes("unique") || message.includes("different") || message.includes("special")) {
@@ -317,7 +371,7 @@ const HarAI = () => {
       return "🚀 Getting started with Matrix Minds is easy:\n\n1. 📞 Contact us for a free consultation\n2. 💬 Discuss your specific requirements\n3. 📋 Receive a customized proposal\n4. 🤝 Begin your transformation journey\n\nReach out at matrixmindsha@gmail.com or +91 9942658278. Our team is ready to help you leverage the power of AI and security!";
     }
     
-    return "🤔 That's an interesting question! While I'd love to help with more specific details, our expert team at Matrix Minds can provide comprehensive answers tailored to your needs.\n\n📧 Contact us at: matrixmindsha@gmail.com\n📞 Call us at: +91 9942658278\n\nOur specialists will be happy to discuss your requirements in detail!";
+    return "🤔 That's an interesting question! I can help with general cybersecurity and technology questions, or provide information about Matrix Minds services.\n\n📧 For detailed discussions: matrixmindsha@gmail.com\n📞 For immediate assistance: +91 9942658278\n\nTry asking me about cybersecurity, ethical hacking, or our AI solutions!";
   };
 
   const handleSendMessage = async (messageText?: string) => {

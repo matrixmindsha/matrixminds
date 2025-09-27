@@ -77,11 +77,32 @@ const ChatBox = () => {
     "ai": "🧠 Our AI services include Custom Machine Learning models, Natural Language Processing, Computer Vision solutions, Predictive Analytics, AI Automation & Chatbots, and Deep Learning applications to solve complex problems and drive innovation.",
     "contact": "📞 Ready to transform your business? Contact Matrix Minds:\n📧 Email: matrixmindsha@gmail.com\n☎️ Phone: +91 9942658278\n🌍 Location: India (Serving clients worldwide)\n\nOur team responds within 24 hours!",
     "consultation": "🎉 FREE CONSULTATION AVAILABLE NOW! Our experts will analyze your needs and provide tailored AI solutions. Limited time offer - reach out today at matrixmindsha@gmail.com or +91 9942658278 to secure your spot!",
+    
+    // General Knowledge Responses
+    "cybersecurity": "🔒 **Cybersecurity** protects systems, networks, and data from digital attacks. It includes network security, information security, application security, and disaster recovery. Essential for protecting against evolving cyber threats in our digital world.",
+    "ethical_hacking": "⚡ **Ethical Hacking** is authorized security testing to find vulnerabilities before malicious actors do. Includes penetration testing, vulnerability assessments, and security audits. Always done with permission and proper documentation.",
+    "penetration_testing": "🎯 **Penetration Testing** simulates cyber attacks to identify security weaknesses. Involves planning, scanning, gaining access, and reporting findings to help organizations improve their security posture.",
+    "network_security": "🌐 **Network Security** protects network infrastructure through firewalls, IDS/IPS, VPNs, and access controls. Defends against DDoS attacks, unauthorized access, and network reconnaissance.",
   };
 
   const getBotResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
     
+    // General knowledge responses
+    if (message.includes("what is cybersecurity") || message.includes("cybersecurity definition")) {
+      return predefinedResponses.cybersecurity;
+    }
+    if (message.includes("what is ethical hacking") || message.includes("ethical hacking definition")) {
+      return predefinedResponses.ethical_hacking;
+    }
+    if (message.includes("penetration testing") || message.includes("pen testing")) {
+      return predefinedResponses.penetration_testing;
+    }
+    if (message.includes("network security")) {
+      return predefinedResponses.network_security;
+    }
+    
+    // Matrix Minds specific responses
     if (message.includes("service") || message.includes("offer") || message.includes("solution")) {
       return predefinedResponses.services;
     }
@@ -95,10 +116,10 @@ const ChatBox = () => {
       return predefinedResponses.consultation;
     }
     if (message.includes("hello") || message.includes("hi") || message.includes("hey")) {
-      return "👋 Hello! Welcome to Matrix Minds. I'm here to help you explore our innovative AI solutions and cybersecurity services. What would you like to know?";
+      return "👋 Hello! Welcome to Matrix Minds. I can help with our AI/cybersecurity services and answer general questions about technology and security. What would you like to know?";
     }
     
-    return "🤔 That's an interesting question! Our expert team at Matrix Minds can provide comprehensive answers. Contact us at matrixmindsha@gmail.com or +91 9942658278 for detailed discussions about your requirements!";
+    return "🤔 I can help with cybersecurity questions or Matrix Minds services! Try asking about ethical hacking, penetration testing, or our AI solutions. Contact us at matrixmindsha@gmail.com for detailed discussions!";
   };
 
   const handleSendMessage = async () => {
@@ -196,11 +217,12 @@ const ChatBox = () => {
   }, [isDragging, dragStart]);
 
   const quickSuggestions = [
-    "Tell me about AI services",
-    "How can you help my business?",
     "What is cybersecurity?",
-    "Free consultation details",
-    "Pricing information"
+    "What is ethical hacking?",
+    "Tell me about penetration testing",
+    "What is network security?",
+    "How can Matrix Minds help my business?",
+    "Free consultation details"
   ];
 
   const advantages = [
