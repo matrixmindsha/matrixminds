@@ -12,8 +12,11 @@ import {
   LazyContactSection,
   SectionSkeleton 
 } from "@/components/PerformanceOptimizer";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
 const Index = () => {
+  // Track visitor analytics
+  useVisitorTracking();
   return (
     <div className="min-h-screen relative">
       {/* Animated tech background */}
