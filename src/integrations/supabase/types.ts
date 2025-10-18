@@ -14,10 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      visitor_analytics: {
+        Row: {
+          city: string | null
+          country: string | null
+          device_type: string | null
+          id: string
+          page_path: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          visited_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          id?: string
+          page_path: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          visited_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          id?: string
+          page_path?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          visited_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      visitor_stats: {
+        Row: {
+          pages_visited: number | null
+          total_visits: number | null
+          unique_visitors: number | null
+          visit_date: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
