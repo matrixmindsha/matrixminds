@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Lightbulb, Target, Zap } from "lucide-react";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
+import { useAIChat } from "@/hooks/useAIChat";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -36,6 +38,8 @@ const ChatBox = () => {
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const { streamChat, isLoading } = useAIChat();
+  const { toast } = useToast();
 
   // Initialize speech recognition
   useEffect(() => {
@@ -123,7 +127,7 @@ const ChatBox = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -133,29 +137,60 @@ const ChatBox = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userInput = inputMessage;
     setInputMessage("");
     setIsTyping(true);
 
-    // Simulate typing delay
-    setTimeout(() => {
-      const botResponseText = getBotResponse(inputMessage);
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: botResponseText,
-        isBot: true,
-        timestamp: new Date(),
-      };
+    // Prepare conversation history for AI
+    const conversationMessages = messages.map(msg => ({
+      role: msg.isBot ? 'assistant' as const : 'user' as const,
+      content: msg.text
+    }));
+    conversationMessages.push({ role: 'user', content: userInput });
 
-      setMessages(prev => [...prev, botResponse]);
+    let assistantResponse = '';
+    const tempId = (Date.now() + 1).toString();
+
+    try {
+      await streamChat(
+        conversationMessages,
+        (chunk) => {
+          assistantResponse += chunk;
+          setMessages(prev => {
+            const lastMsg = prev[prev.length - 1];
+            if (lastMsg?.id === tempId) {
+              return prev.map(m => m.id === tempId ? { ...m, text: assistantResponse } : m);
+            }
+            return [...prev, {
+              id: tempId,
+              text: assistantResponse,
+              isBot: true,
+              timestamp: new Date()
+            }];
+          });
+        },
+        () => {
+          setIsTyping(false);
+          // Speak the response
+          if ('speechSynthesis' in window && assistantResponse) {
+            const cleanText = assistantResponse.replace(/[🚀🧠📞🎉👋🤔📧☎️🌍⚡🔒🎯🌐]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 0.8;
+            speechSynthesis.speak(utterance);
+          }
+        }
+      );
+    } catch (error) {
       setIsTyping(false);
-      
-      // Speak the response
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(botResponseText.replace(/[🚀🧠📞🎉👋🤔📧☎️🌍]/g, ''));
-        utterance.rate = 0.8;
-        speechSynthesis.speak(utterance);
-      }
-    }, 1000 + Math.random() * 1000);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to get response';
+      toast({
+        title: "Error",
+        description: errorMsg,
+        variant: "destructive"
+      });
+      // Remove the temp message on error
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+    }
   };
 
   const startListening = () => {
