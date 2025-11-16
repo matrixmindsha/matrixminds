@@ -112,7 +112,7 @@ Sent from Matrix Minds website contact form
                   <Phone className="w-5 h-5 text-accent" />
                   <div>
                     <p className="font-semibold">Phone</p>
-                    <p className="text-muted-foreground">+91 9942658278</p>
+                    <p className="text-muted-foreground">+91 9629310410</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
