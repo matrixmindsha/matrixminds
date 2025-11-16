@@ -34,7 +34,7 @@ const AboutSection = () => {
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <Phone className="w-4 h-4" />
-                    <span>9942658278</span>
+                    <span>9629310410</span>
                   </div>
                 </div>
               </CardContent>
