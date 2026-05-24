@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ExternalLink, Gamepad2, Heart, Sparkles } from "lucide-react";
 
 const HH_URL = "https://hriharionline.lovable.app/";
 const UPI_ID = "9629310410@upi";
-const DONATE_URL = `upi://pay?pa=${UPI_ID}&pn=Matrix%20Minds&cu=INR`;
+const buildUpiUrl = (amt?: number) =>
+  `upi://pay?pa=${UPI_ID}&pn=Matrix%20Minds&cu=INR${amt ? `&am=${amt}` : ""}`;
 
 const LaunchSection = () => {
+  const [amount, setAmount] = useState<string>("");
+  const numAmount = Number(amount);
+  const validAmount = !isNaN(numAmount) && numAmount > 0;
   return (
     <section id="launch" className="py-20 relative">
       <div className="container mx-auto px-4">
