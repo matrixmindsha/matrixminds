@@ -39,6 +39,7 @@ const Index = () => {
           <Suspense fallback={<SectionSkeleton />}>
             <LazyAboutSection />
           </Suspense>
+          <LaunchSection />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyCertificationsSection />
           </Suspense>
