@@ -514,11 +514,12 @@ const ChatBox = () => {
               </div>
               <Button
                 onClick={handleSendMessage}
-                disabled={!inputMessage.trim()}
-                className="h-10 w-10 p-0 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-primary/50 transition-all duration-300"
+                disabled={!inputMessage.trim() || isLoading}
+                className="h-10 w-10 p-0 bg-gradient-to-br from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-primary/50 transition-all duration-300 disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
               </Button>
+
             </div>
             
             {isListening && (
