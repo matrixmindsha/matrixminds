@@ -352,25 +352,33 @@ const ChatBox = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg backdrop-blur-sm border ${
+                    className={`max-w-[85%] p-3 rounded-2xl backdrop-blur-sm border shadow-sm transition-all ${
                       message.isBot
-                        ? "bg-muted/50 border-primary/20 text-foreground"
-                        : "bg-primary/90 border-primary text-primary-foreground"
+                        ? "bg-muted/60 border-primary/20 text-foreground rounded-tl-sm"
+                        : "bg-gradient-to-br from-primary to-accent border-primary text-primary-foreground rounded-tr-sm"
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       {message.isBot && (
-                        <Bot className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <Bot className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
                       )}
-                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                      <div className="text-sm leading-relaxed flex-1 prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-pre:my-2 prose-code:text-xs prose-pre:text-xs break-words">
+                        {message.isBot ? (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.text}
+                          </ReactMarkdown>
+                        ) : (
+                          <p className="whitespace-pre-wrap m-0">{message.text}</p>
+                        )}
+                      </div>
                       {message.isBot && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-primary/20"
+                          className="h-6 w-6 p-0 hover:bg-primary/20 flex-shrink-0"
                           onClick={() => {
                             if ('speechSynthesis' in window) {
-                              const utterance = new SpeechSynthesisUtterance(message.text.replace(/[🚀🧠📞🎉👋🤔📧☎️🌍]/g, ''));
+                              const utterance = new SpeechSynthesisUtterance(message.text.replace(/[*_`#>\-]/g, ''));
                               speechSynthesis.speak(utterance);
                             }
                           }}
@@ -383,8 +391,10 @@ const ChatBox = () => {
                 </div>
               ))}
               {isTyping && <TypingIndicator />}
+              <div ref={scrollRef} />
             </ScrollArea>
           </TabsContent>
+
 
           <TabsContent value="start" className="flex-1 p-4">
             <ScrollArea className="h-[350px]">
