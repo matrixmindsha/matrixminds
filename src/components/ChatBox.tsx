@@ -9,6 +9,8 @@ import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Ligh
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 import { useAIChat } from "@/hooks/useAIChat";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
