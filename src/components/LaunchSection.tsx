@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ExternalLink, Gamepad2, Heart, Sparkles } from "lucide-react";
 
 const HH_URL = "https://hriharionline.lovable.app/";
 const UPI_ID = "9629310410@upi";
-const DONATE_URL = `upi://pay?pa=${UPI_ID}&pn=Matrix%20Minds&cu=INR`;
+const buildUpiUrl = (amt?: number) =>
+  `upi://pay?pa=${UPI_ID}&pn=Matrix%20Minds&cu=INR${amt ? `&am=${amt}` : ""}`;
 
 const LaunchSection = () => {
+  const [amount, setAmount] = useState<string>("");
+  const numAmount = Number(amount);
+  const validAmount = !isNaN(numAmount) && numAmount > 0;
   return (
     <section id="launch" className="py-20 relative">
       <div className="container mx-auto px-4">
@@ -106,29 +112,53 @@ const LaunchSection = () => {
                 {[100, 500, 1000].map((amt) => (
                   <Button
                     key={amt}
-                    asChild
-                    variant="outline"
+                    type="button"
+                    variant={String(amt) === amount ? "hero" : "outline"}
                     className="border-primary/40 hover:bg-primary/10"
+                    onClick={() => setAmount(String(amt))}
                   >
-                    <a
-                      href={`upi://pay?pa=${UPI_ID}&pn=Matrix%20Minds&am=${amt}&cu=INR`}
-                    >
-                      ₹{amt}
-                    </a>
+                    ₹{amt}
                   </Button>
                 ))}
               </div>
 
+              <div className="mb-4">
+                <label className="text-xs text-muted-foreground mb-2 block">
+                  Or enter your own amount (₹)
+                </label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  placeholder="e.g. 250"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                  className="bg-background/40 border-accent/30 focus-visible:ring-accent"
+                />
+              </div>
+
               <Button
-                asChild
+                asChild={validAmount}
+                disabled={!validAmount}
                 variant="hero"
                 size="lg"
                 className="w-full font-orbitron font-bold"
               >
-                <a href={DONATE_URL}>
-                  <Heart className="mr-2 w-4 h-4" /> Donate Now
-                </a>
+                {validAmount ? (
+                  <a href={buildUpiUrl(numAmount)}>
+                    <Heart className="mr-2 w-4 h-4" /> Donate ₹{numAmount}
+                  </a>
+                ) : (
+                  <span>
+                    <Heart className="mr-2 w-4 h-4" /> Enter an amount to donate
+                  </span>
+                )}
               </Button>
+
+              <p className="text-[10px] text-muted-foreground text-center mt-3">
+                Opens any UPI app (GPay, PhonePe, Paytm, BHIM…) on your phone.
+              </p>
+
             </CardContent>
           </Card>
         </div>

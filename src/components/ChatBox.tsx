@@ -9,6 +9,8 @@ import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Ligh
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 import { useAIChat } from "@/hooks/useAIChat";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -26,11 +28,12 @@ const ChatBox = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "🚀 Welcome to Matrix Minds! I'm your AI assistant. How can I help you explore our cutting-edge solutions today?",
+      text: "👋 Hi! I'm **HAR-AI** — your intelligent assistant from Matrix Minds. I can help with anything: tech questions, general knowledge, advice, or connecting you directly with our founder **Mr. S. Hareedh**. What can I help you with today?",
       isBot: true,
       timestamp: new Date(),
     },
   ]);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [inputMessage, setInputMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -75,6 +78,12 @@ const ChatBox = () => {
       recognitionRef.current = recognition;
     }
   }, []);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, isTyping]);
+
 
   const predefinedResponses: { [key: string]: string } = {
     "services": "🚀 Matrix Minds offers cutting-edge AI & Machine Learning solutions, Ethical Hacking & Cybersecurity services, and Data Science & Analytics. We specialize in custom AI models, penetration testing, and business intelligence solutions designed to transform businesses.",
@@ -349,25 +358,33 @@ const ChatBox = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg backdrop-blur-sm border ${
+                    className={`max-w-[85%] p-3 rounded-2xl backdrop-blur-sm border shadow-sm transition-all ${
                       message.isBot
-                        ? "bg-muted/50 border-primary/20 text-foreground"
-                        : "bg-primary/90 border-primary text-primary-foreground"
+                        ? "bg-muted/60 border-primary/20 text-foreground rounded-tl-sm"
+                        : "bg-gradient-to-br from-primary to-accent border-primary text-primary-foreground rounded-tr-sm"
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       {message.isBot && (
-                        <Bot className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <Bot className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
                       )}
-                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                      <div className="text-sm leading-relaxed flex-1 prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-pre:my-2 prose-code:text-xs prose-pre:text-xs break-words">
+                        {message.isBot ? (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.text}
+                          </ReactMarkdown>
+                        ) : (
+                          <p className="whitespace-pre-wrap m-0">{message.text}</p>
+                        )}
+                      </div>
                       {message.isBot && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 hover:bg-primary/20"
+                          className="h-6 w-6 p-0 hover:bg-primary/20 flex-shrink-0"
                           onClick={() => {
                             if ('speechSynthesis' in window) {
-                              const utterance = new SpeechSynthesisUtterance(message.text.replace(/[🚀🧠📞🎉👋🤔📧☎️🌍]/g, ''));
+                              const utterance = new SpeechSynthesisUtterance(message.text.replace(/[*_`#>\-]/g, ''));
                               speechSynthesis.speak(utterance);
                             }
                           }}
@@ -380,8 +397,10 @@ const ChatBox = () => {
                 </div>
               ))}
               {isTyping && <TypingIndicator />}
+              <div ref={scrollRef} />
             </ScrollArea>
           </TabsContent>
+
 
           <TabsContent value="start" className="flex-1 p-4">
             <ScrollArea className="h-[350px]">
@@ -495,11 +514,12 @@ const ChatBox = () => {
               </div>
               <Button
                 onClick={handleSendMessage}
-                disabled={!inputMessage.trim()}
-                className="h-10 w-10 p-0 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-primary/50 transition-all duration-300"
+                disabled={!inputMessage.trim() || isLoading}
+                className="h-10 w-10 p-0 bg-gradient-to-br from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-primary/50 transition-all duration-300 disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
               </Button>
+
             </div>
             
             {isListening && (
