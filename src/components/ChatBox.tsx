@@ -28,11 +28,12 @@ const ChatBox = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "🚀 Welcome to Matrix Minds! I'm your AI assistant. How can I help you explore our cutting-edge solutions today?",
+      text: "👋 Hi! I'm **HAR-AI** — your intelligent assistant from Matrix Minds. I can help with anything: tech questions, general knowledge, advice, or connecting you directly with our founder **Mr. S. Hareedh**. What can I help you with today?",
       isBot: true,
       timestamp: new Date(),
     },
   ]);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [inputMessage, setInputMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
