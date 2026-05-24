@@ -79,6 +79,12 @@ const ChatBox = () => {
     }
   }, []);
 
+  // Auto-scroll to latest message
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, isTyping]);
+
+
   const predefinedResponses: { [key: string]: string } = {
     "services": "🚀 Matrix Minds offers cutting-edge AI & Machine Learning solutions, Ethical Hacking & Cybersecurity services, and Data Science & Analytics. We specialize in custom AI models, penetration testing, and business intelligence solutions designed to transform businesses.",
     "ai": "🧠 Our AI services include Custom Machine Learning models, Natural Language Processing, Computer Vision solutions, Predictive Analytics, AI Automation & Chatbots, and Deep Learning applications to solve complex problems and drive innovation.",
