@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import LaunchSection from "@/components/LaunchSection";
 import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
 import { 
@@ -38,6 +39,7 @@ const Index = () => {
           <Suspense fallback={<SectionSkeleton />}>
             <LazyAboutSection />
           </Suspense>
+          <LaunchSection />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyCertificationsSection />
           </Suspense>
