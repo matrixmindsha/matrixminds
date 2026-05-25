@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import LaunchSection from "@/components/LaunchSection";
 import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
+import AdSlot from "@/components/AdSlot";
 import { 
   LazyHeroSection, 
   LazyAboutSection, 
@@ -46,6 +47,7 @@ const Index = () => {
           <Suspense fallback={<SectionSkeleton />}>
             <LazyServicesSection />
           </Suspense>
+          <AdSlot />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyFeedbackSection />
           </Suspense>
