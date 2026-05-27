@@ -60,6 +60,7 @@ const Index = () => {
         </main>
         <Footer />
         <ChatBox />
+        <StickyDonate />
       </div>
     </div>
   );
