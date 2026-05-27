@@ -5,6 +5,7 @@ import LaunchSection from "@/components/LaunchSection";
 import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
 import AdSlot from "@/components/AdSlot";
+import StickyDonate from "@/components/StickyDonate";
 import { 
   LazyHeroSection, 
   LazyAboutSection, 
@@ -37,6 +38,7 @@ const Index = () => {
           <Suspense fallback={<SectionSkeleton />}>
             <LazyHeroSection />
           </Suspense>
+          <AdSlot label="Sponsored" />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyAboutSection />
           </Suspense>
@@ -44,10 +46,11 @@ const Index = () => {
           <Suspense fallback={<SectionSkeleton />}>
             <LazyCertificationsSection />
           </Suspense>
+          <AdSlot label="Advertisement" />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyServicesSection />
           </Suspense>
-          <AdSlot />
+          <AdSlot label="Sponsored" />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyFeedbackSection />
           </Suspense>
@@ -57,6 +60,7 @@ const Index = () => {
         </main>
         <Footer />
         <ChatBox />
+        <StickyDonate />
       </div>
     </div>
   );
