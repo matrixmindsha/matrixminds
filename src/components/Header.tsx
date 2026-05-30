@@ -21,7 +21,7 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             <img src={logo} alt="Matrix Minds" className="h-12 w-12" />
             <div>
-              <h1 className="font-orbitron text-xl font-black text-foreground">MATRIX MINDS</h1>
+              <div className="font-orbitron text-xl font-black text-foreground">MATRIX MINDS</div>
               <p className="font-rajdhani text-xs text-primary font-semibold">🌍 Global AI Solutions</p>
             </div>
           </div>
@@ -73,6 +73,8 @@ const Header = () => {
             variant="ghost"
             size="icon"
             className="md:hidden"
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X /> : <Menu />}

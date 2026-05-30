@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -51,6 +52,15 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Helmet>
+        <title>Sign in — Matrix Minds Admin</title>
+        <meta name="description" content="Sign in to the Matrix Minds admin area to access internal analytics." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://matrixminds.lovable.app/auth" />
+        <meta property="og:title" content="Sign in — Matrix Minds Admin" />
+        <meta property="og:description" content="Admin sign-in for Matrix Minds." />
+        <meta property="og:url" content="https://matrixminds.lovable.app/auth" />
+      </Helmet>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{mode === 'signin' ? 'Sign in' : 'Create account'}</CardTitle>
