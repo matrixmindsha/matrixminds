@@ -109,6 +109,15 @@ export const AnalyticsDashboard = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
+      <Helmet>
+        <title>Visitor Analytics — Matrix Minds Admin</title>
+        <meta name="description" content="Internal visitor analytics dashboard for Matrix Minds admins." />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://matrixminds.lovable.app/analytics" />
+        <meta property="og:title" content="Visitor Analytics — Matrix Minds Admin" />
+        <meta property="og:description" content="Internal analytics dashboard." />
+        <meta property="og:url" content="https://matrixminds.lovable.app/analytics" />
+      </Helmet>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2">Visitor Analytics</h1>
