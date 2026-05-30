@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Eye, FileText, TrendingUp } from 'lucide-react';
+import { Users, Eye, FileText, TrendingUp, LogOut } from 'lucide-react';
 
 interface AnalyticsData {
   totalVisits: number;
@@ -12,6 +14,8 @@ interface AnalyticsData {
 }
 
 export const AnalyticsDashboard = () => {
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     totalVisits: 0,
     uniqueVisitors: 0,
@@ -22,56 +26,65 @@ export const AnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        // Get total stats
-        const { data: allVisits, error: visitsError } = await supabase
-          .from('visitor_analytics')
-          .select('*');
+    const checkAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
 
-        if (visitsError) throw visitsError;
+      if (!roles) {
+        setAuthorized(false);
+        setLoading(false);
+        return;
+      }
+      setAuthorized(true);
+
+      try {
+        const { data: allVisits, error } = await supabase.from('visitor_analytics').select('*');
+        if (error) throw error;
 
         const totalVisits = allVisits?.length || 0;
-        const uniqueVisitors = new Set(allVisits?.map(v => v.session_id)).size;
-        const pagesVisited = new Set(allVisits?.map(v => v.page_path)).size;
+        const uniqueVisitors = new Set(allVisits?.map((v) => v.session_id)).size;
+        const pagesVisited = new Set(allVisits?.map((v) => v.page_path)).size;
 
-        // Get top pages
         const pageCounts: Record<string, number> = {};
-        allVisits?.forEach(visit => {
-          pageCounts[visit.page_path] = (pageCounts[visit.page_path] || 0) + 1;
+        allVisits?.forEach((v) => {
+          pageCounts[v.page_path] = (pageCounts[v.page_path] || 0) + 1;
         });
         const topPages = Object.entries(pageCounts)
           .map(([page, visits]) => ({ page, visits }))
           .sort((a, b) => b.visits - a.visits)
           .slice(0, 5);
 
-        // Get device stats
         const deviceCounts: Record<string, number> = {};
-        allVisits?.forEach(visit => {
-          if (visit.device_type) {
-            deviceCounts[visit.device_type] = (deviceCounts[visit.device_type] || 0) + 1;
-          }
+        allVisits?.forEach((v) => {
+          if (v.device_type) deviceCounts[v.device_type] = (deviceCounts[v.device_type] || 0) + 1;
         });
         const deviceStats = Object.entries(deviceCounts)
           .map(([device, count]) => ({ device, count }))
           .sort((a, b) => b.count - a.count);
 
-        setAnalytics({
-          totalVisits,
-          uniqueVisitors,
-          pagesVisited,
-          topPages,
-          deviceStats,
-        });
-      } catch (error) {
-        console.error('Error fetching analytics:', error);
+        setAnalytics({ totalVisits, uniqueVisitors, pagesVisited, topPages, deviceStats });
+      } catch (e) {
+        console.error('Analytics error', e);
       } finally {
         setLoading(false);
       }
     };
+    checkAccess();
+  }, [navigate]);
 
-    fetchAnalytics();
-  }, []);
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
 
   if (loading) {
     return (
@@ -81,14 +94,30 @@ export const AnalyticsDashboard = () => {
     );
   }
 
+  if (authorized === false) {
+    return (
+      <div className="container mx-auto py-16 px-4 max-w-md text-center space-y-4">
+        <h1 className="text-2xl font-bold">Access denied</h1>
+        <p className="text-muted-foreground">
+          Your account does not have admin access to view analytics.
+        </p>
+        <Button onClick={handleSignOut} variant="outline">Sign out</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Visitor Analytics</h1>
-        <p className="text-muted-foreground">Track and analyze your website traffic</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Visitor Analytics</h1>
+          <p className="text-muted-foreground">Track and analyze your website traffic</p>
+        </div>
+        <Button onClick={handleSignOut} variant="outline" size="sm">
+          <LogOut className="h-4 w-4 mr-2" /> Sign out
+        </Button>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -139,7 +168,6 @@ export const AnalyticsDashboard = () => {
         </Card>
       </div>
 
-      {/* Top Pages */}
       <Card>
         <CardHeader>
           <CardTitle>Top Pages</CardTitle>
@@ -151,9 +179,7 @@ export const AnalyticsDashboard = () => {
               {analytics.topPages.map((page, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      #{index + 1}
-                    </span>
+                    <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
                     <span className="text-sm font-medium">{page.page}</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -161,9 +187,7 @@ export const AnalyticsDashboard = () => {
                     <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary"
-                        style={{
-                          width: `${(page.visits / analytics.totalVisits) * 100}%`,
-                        }}
+                        style={{ width: `${(page.visits / analytics.totalVisits) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -176,7 +200,6 @@ export const AnalyticsDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Device Stats */}
       <Card>
         <CardHeader>
           <CardTitle>Device Types</CardTitle>
@@ -193,9 +216,7 @@ export const AnalyticsDashboard = () => {
                     <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary"
-                        style={{
-                          width: `${(device.count / analytics.totalVisits) * 100}%`,
-                        }}
+                        style={{ width: `${(device.count / analytics.totalVisits) * 100}%` }}
                       />
                     </div>
                   </div>

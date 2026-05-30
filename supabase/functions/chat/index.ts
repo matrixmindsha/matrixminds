@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -39,17 +40,63 @@ If a user wants to support / donate, point them to the **Donation** section on t
 
 Always be the bridge between the visitor and Matrix Minds.`;
 
+const MAX_MESSAGES = 30;
+const MAX_CONTENT_LEN = 4000;
+
+function validateMessages(input: unknown): { ok: true; messages: { role: string; content: string }[] } | { ok: false; error: string } {
+  if (!Array.isArray(input)) return { ok: false, error: "messages must be an array" };
+  if (input.length === 0) return { ok: false, error: "messages cannot be empty" };
+  if (input.length > MAX_MESSAGES) return { ok: false, error: `too many messages (max ${MAX_MESSAGES})` };
+  const cleaned: { role: string; content: string }[] = [];
+  for (const m of input) {
+    if (!m || typeof m !== "object") return { ok: false, error: "invalid message object" };
+    const role = (m as { role?: unknown }).role;
+    const content = (m as { content?: unknown }).content;
+    if (role !== "user" && role !== "assistant") return { ok: false, error: "invalid message role" };
+    if (typeof content !== "string" || content.length === 0) return { ok: false, error: "invalid message content" };
+    if (content.length > MAX_CONTENT_LEN) return { ok: false, error: `message exceeds ${MAX_CONTENT_LEN} chars` };
+    cleaned.push({ role, content });
+  }
+  return { ok: true, messages: cleaned };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // NOTE: This endpoint is intentionally public so anonymous website visitors
+    // can use the HAR-AI assistant. Abuse protection is provided via:
+    //  - strict input validation (size/shape/count limits below)
+    //  - upstream Lovable AI Gateway rate limiting (429) and credit caps (402)
+    //  - generic error responses (no internal config leaked)
 
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const validation = validateMessages((body as { messages?: unknown })?.messages);
+    if (!validation.ok) {
+      return new Response(JSON.stringify({ error: validation.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -60,10 +107,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
-        ],
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...validation.messages],
         stream: true,
       }),
     });
@@ -83,10 +127,10 @@ serve(async (req) => {
       }
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
-      return new Response(
-        JSON.stringify({ error: "AI service error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Internal server error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(response.body, {
@@ -94,9 +138,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Chat error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
