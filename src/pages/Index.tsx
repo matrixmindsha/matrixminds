@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LaunchSection from "@/components/LaunchSection";
@@ -23,6 +24,15 @@ const Index = () => {
   useVisitorTracking();
   return (
     <div className="min-h-screen relative">
+      <Helmet>
+        <title>Matrix Minds — AI & Cybersecurity by S. Hareedh</title>
+        <meta name="description" content="Matrix Minds delivers AI, machine learning, data science and ethical-hacking solutions worldwide. Founded by S. Hareedh. Book a free consultation today." />
+        <link rel="canonical" href="https://matrixminds.lovable.app/" />
+        <meta property="og:title" content="Matrix Minds — AI & Cybersecurity by S. Hareedh" />
+        <meta property="og:description" content="AI, ML, data science and ethical-hacking solutions worldwide. Founded by S. Hareedh." />
+        <meta property="og:url" content="https://matrixminds.lovable.app/" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       {/* Animated tech background */}
       <TechBackground />
       
