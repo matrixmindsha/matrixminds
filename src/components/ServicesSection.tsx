@@ -91,12 +91,13 @@ const ServicesSection = () => {
                     </li>
                   ))}
                 </ul>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full mt-4"
                   onClick={scrollToContact}
+                  aria-label={`Learn more about ${service.title}`}
                 >
-                  Learn More
+                  Learn about {service.title}
                 </Button>
               </CardContent>
             </Card>

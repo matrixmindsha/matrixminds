@@ -29,7 +29,7 @@ const HeroSection = () => {
 
           <div className="animate-matrix-text">
             <h1 className="font-orbitron text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-float">
-              MATRIX MINDS
+              Matrix Minds — Global AI &amp; Cybersecurity Solutions
             </h1>
             <p className="font-rajdhani text-xl md:text-2xl text-muted-foreground mb-4 font-semibold">
               Building the Future with AI • Worldwide Services
@@ -63,17 +63,17 @@ const HeroSection = () => {
           <div className="grid md:grid-cols-3 gap-6 mt-16">
             <div className="p-6 rounded-xl bg-gradient-to-br from-card/60 via-card/40 to-transparent backdrop-blur-md border border-primary/30 hover:border-primary/60 transition-all duration-500 animate-float hover:animate-pulse-glow group">
               <Brain className="w-12 h-12 text-primary mx-auto mb-4 animate-circuit-glow group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="font-orbitron text-xl font-bold mb-2 text-primary">AI & ML</h3>
+              <h2 className="font-orbitron text-xl font-bold mb-2 text-primary">AI & ML</h2>
               <p className="font-exo text-muted-foreground">🌍 Global AI solutions & consulting</p>
             </div>
             <div className="p-6 rounded-xl bg-gradient-to-br from-card/60 via-card/40 to-transparent backdrop-blur-md border border-accent/30 hover:border-accent/60 transition-all duration-500 animate-float hover:animate-pulse-glow group" style={{animationDelay: '0.2s'}}>
               <Shield className="w-12 h-12 text-accent mx-auto mb-4 animate-circuit-glow group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="font-orbitron text-xl font-bold mb-2 text-accent">Ethical Hacking</h3>
+              <h2 className="font-orbitron text-xl font-bold mb-2 text-accent">Ethical Hacking</h2>
               <p className="font-exo text-muted-foreground">🔒 Worldwide cybersecurity services</p>
             </div>
             <div className="p-6 rounded-xl bg-gradient-to-br from-card/60 via-card/40 to-transparent backdrop-blur-md border border-primary/30 hover:border-primary/60 transition-all duration-500 animate-float hover:animate-pulse-glow group" style={{animationDelay: '0.4s'}}>
               <Database className="w-12 h-12 text-primary mx-auto mb-4 animate-circuit-glow group-hover:scale-110 transition-transform duration-300" />
-              <h3 className="font-orbitron text-xl font-bold mb-2 text-primary">Data Science</h3>
+              <h2 className="font-orbitron text-xl font-bold mb-2 text-primary">Data Science</h2>
               <p className="font-exo text-muted-foreground">📊 Remote data analytics globally</p>
             </div>
           </div>

@@ -20,10 +20,12 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /analytics
 Crawl-delay: 2
 
 # Sitemap location
-Sitemap: https://matrix-minds-har.lovable.app/sitemap.xml
+Sitemap: https://matrixminds.lovable.app/sitemap.xml
 
 # Host directive
-Host: https://matrix-minds-har.lovable.app
+Host: https://matrixminds.lovable.app

@@ -1,0 +1,13 @@
+# Matrix Minds
+
+> AI, machine learning, data science and ethical-hacking solutions worldwide, founded by S. Hareedh.
+
+Matrix Minds is a global technology studio specializing in custom AI/ML
+solutions, cybersecurity & penetration testing, data analytics, and
+bespoke software. Contact: matrixmindsha@gmail.com / +91 9629310410.
+
+## Pages
+- [Home](/): Overview of Matrix Minds services, founder, projects, store, and contact.
+
+## Optional
+- [Sitemap](/sitemap.xml): Crawlable URL list for the site.
