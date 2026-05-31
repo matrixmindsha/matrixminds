@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Award, Calendar, BadgeCheck, ShieldCheck, FileText, Download } from "lucide-react";
+
 
 // Import certificate images
 import roboticsCert from "@/assets/certificates/robotics-certificate.jpg";
@@ -94,6 +96,89 @@ const CertificationsSection = () => {
             Professional certifications and training programs that showcase expertise in AI, Machine Learning, Data Science, and emerging technologies.
           </p>
         </div>
+
+        {/* Government-verified MSME / Udyam badge */}
+        <Card className="mb-12 overflow-hidden border-2 border-accent/40 bg-gradient-to-br from-accent/10 via-primary/5 to-accent/10 backdrop-blur-md relative">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-accent/20 rounded-full blur-3xl -z-0" />
+          <CardContent className="p-6 md:p-8 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <div className="flex-shrink-0 mx-auto md:mx-0">
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                  <ShieldCheck className="w-12 h-12 text-primary-foreground" />
+                  <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-1">
+                    <BadgeCheck className="w-6 h-6 text-accent" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2">
+                  <Badge className="bg-accent text-accent-foreground font-bold">
+                    <BadgeCheck className="w-3.5 h-3.5 mr-1" /> Government Verified
+                  </Badge>
+                  <Badge variant="outline" className="border-accent/50">
+                    MSME · Micro Enterprise
+                  </Badge>
+                  <Badge variant="outline" className="border-primary/50">
+                    Govt. of India
+                  </Badge>
+                </div>
+                <h3 className="font-orbitron text-xl md:text-2xl font-black text-foreground mb-1">
+                  Udyam Registered Enterprise
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Matrix Minds is officially registered with the Ministry of Micro, Small &amp; Medium
+                  Enterprises, Government of India.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+                  <div className="flex justify-between sm:block">
+                    <span className="text-muted-foreground">Udyam Reg. No.</span>{" "}
+                    <span className="font-mono font-bold text-foreground">UDYAM-TN-01-0035075</span>
+                  </div>
+                  <div className="flex justify-between sm:block">
+                    <span className="text-muted-foreground">Enterprise</span>{" "}
+                    <span className="font-bold text-foreground">MATRIX MINDS</span>
+                  </div>
+                  <div className="flex justify-between sm:block">
+                    <span className="text-muted-foreground">Activity</span>{" "}
+                    <span className="font-bold text-foreground">IT Services (NIC 62099)</span>
+                  </div>
+                  <div className="flex justify-between sm:block">
+                    <span className="text-muted-foreground">Registered</span>{" "}
+                    <span className="font-bold text-foreground">29 May 2026</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 md:w-48">
+                <Button asChild variant="hero" size="sm" className="font-orbitron">
+                  <a
+                    href="/certificates/Udyam_Registration_Certificate.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <FileText className="w-4 h-4 mr-1.5" /> View Certificate
+                  </a>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <a href="/certificates/Udyam_Registration_Certificate.pdf" download>
+                    <Download className="w-4 h-4 mr-1.5" /> Download PDF
+                  </a>
+                </Button>
+                <a
+                  href="https://udyamregistration.gov.in/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-center text-muted-foreground hover:text-accent underline-offset-2 hover:underline"
+                >
+                  Verify on udyamregistration.gov.in
+                </a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {certifications.map((cert, index) => (
