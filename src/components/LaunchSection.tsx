@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ExternalLink, Gamepad2, Heart, Sparkles } from "lucide-react";
 
 const HH_URL = "https://hriharionline.lovable.app/";
-const UPI_ID = "9629310410@upi";
+const UPI_ID = "9942658278@ptyes";
 const buildUpiUrl = (amt?: number) =>
   `upi://pay?pa=${UPI_ID}&pn=Matrix%20Minds&cu=INR${amt ? `&am=${amt}` : ""}`;
 
