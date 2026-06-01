@@ -191,12 +191,12 @@ const StoreSection = () => {
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       <Button asChild variant="hero" size="lg">
-                        <a href={`/downloads/${pdf}`} download>
+                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/store-assets/${pdf}`} target="_blank" rel="noopener">
                           <Download className="mr-2 w-4 h-4" /> eBook PDF
                         </a>
                       </Button>
                       <Button asChild variant="matrix" size="lg">
-                        <a href={`/downloads/${zip}`} download>
+                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/store-assets/${zip}`} target="_blank" rel="noopener">
                           <Download className="mr-2 w-4 h-4" /> Source Code
                         </a>
                       </Button>
