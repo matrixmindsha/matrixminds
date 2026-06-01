@@ -17,10 +17,12 @@ const buildIntlMail = (title: string, usd: number) =>
   `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`International order: ${title} ($${usd})`)}&body=${encodeURIComponent(
     `Hi Matrix Minds,\n\nI'd like to buy "${title}" for $${usd} USD. Please send me PayPal / Wise / card payment instructions.\n\nThanks!`
   )}`;
-const buildAccessMail = (userEmail: string, userId: string) =>
-  `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`Access request after payment`)}&body=${encodeURIComponent(
-    `Hi Matrix Minds,\n\nI have paid for the eBook(s). Please grant me download access.\n\nMy account email: ${userEmail}\nMy user id: ${userId}\n\nPayment reference / UTR: (paste here)\nProduct(s): (e.g. AI Mastery)\n\nThanks!`
+const buildAccessMail = (product: Product, userEmail: string, userId: string, selectedCurrency: Currency) => {
+  const amount = selectedCurrency === "INR" ? `₹${product.price}` : `$${product.usdPrice}`;
+  return `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`Payment proof: ${product.title}`)}&body=${encodeURIComponent(
+    `Hi Matrix Minds,\n\nI paid for "${product.title}" (${amount}). Please verify my payment and unlock downloads for my account only after approval.\n\nAccount email: ${userEmail}\nUser ID: ${userId}\nPayment reference / UTR: (paste here)\nPayment screenshot/link: (attach or paste here)\n\nThanks!`
   )}`;
+};
 
 type Currency = "INR" | "USD";
 
@@ -174,8 +176,8 @@ const StoreSection = () => {
                         </Button>
                       ) : (
                         <Button asChild variant="outline" size="sm" className="w-full">
-                          <a href={buildAccessMail(user.email || "", user.id)}>
-                            <Mail className="mr-2 w-4 h-4" /> I've paid — request access
+                          <a href={buildAccessMail(product, user.email || "", user.id, currency)}>
+                            <Mail className="mr-2 w-4 h-4" /> Email payment proof for approval
                           </a>
                         </Button>
                       )}
@@ -188,7 +190,7 @@ const StoreSection = () => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-8 max-w-2xl mx-auto">
-          Downloads are protected. After you pay, click <strong>"I've paid — request access"</strong> and we'll unlock your account within hours.
+          Downloads are protected. After payment, email your proof for admin approval; logging in alone will never unlock paid resources.
           All content is original, drafted by S. Hareedh for Matrix Minds. Ethical Hacking material is for authorised, legal practice only.
         </p>
       </div>
