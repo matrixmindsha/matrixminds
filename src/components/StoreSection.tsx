@@ -1,11 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Lock, LogIn } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth, useHasStoreAccess } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Unlock } from "lucide-react";
 
 const UPI_ID = "9942658278@ptyes";
 const PAYEE = "Matrix Minds";
@@ -16,10 +12,6 @@ const buildUpi = (amt: number, note: string) =>
 const buildIntlMail = (title: string, usd: number) =>
   `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`International order: ${title} ($${usd})`)}&body=${encodeURIComponent(
     `Hi Matrix Minds,\n\nI'd like to buy "${title}" for $${usd} USD. Please send me PayPal / Wise / card payment instructions.\n\nThanks!`
-  )}`;
-const buildAccessRequestMail = (email: string, uid: string) =>
-  `mailto:${INTL_EMAIL}?subject=${encodeURIComponent("Matrix Minds Store — access request")}&body=${encodeURIComponent(
-    `Hi S. Hareedh,\n\nI've completed payment for a Matrix Minds eBook and need download access.\n\nMy account email: ${email}\nMy account user ID: ${uid}\n\nPayment reference / UTR (if any): \n\nThank you!`
   )}`;
 
 type Currency = "INR" | "USD";
@@ -90,29 +82,9 @@ const PRODUCTS: Product[] = [
 
 const StoreSection = () => {
   const [currency, setCurrency] = useState<Currency>("INR");
-  const [busy, setBusy] = useState<string | null>(null);
-  const { user, loading: authLoading } = useAuth();
-  const { hasAccess, checking } = useHasStoreAccess(user?.id);
+  const [paid, setPaid] = useState(false);
 
   const fmt = (p: Product) => (currency === "INR" ? `₹${p.price}` : `$${p.usdPrice}`);
-
-  const handleDownload = async (file: string) => {
-    setBusy(file);
-    try {
-      const { data, error } = await supabase.functions.invoke("get-download", {
-        body: { file },
-      });
-      if (error || !data?.url) {
-        toast.error(data?.error ?? error?.message ?? "Download failed");
-        return;
-      }
-      window.open(data.url as string, "_blank", "noopener");
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setBusy(null);
-    }
-  };
 
   return (
     <section id="store" className="py-20 relative">
@@ -185,50 +157,7 @@ const StoreSection = () => {
                     ))}
                   </ul>
 
-                  {/* THREE STATES: signed-in member, signed-in non-member, signed-out */}
-                  {authLoading || checking ? (
-                    <Button disabled variant="outline" size="lg" className="w-full">
-                      Checking access…
-                    </Button>
-                  ) : hasAccess ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="hero"
-                        size="lg"
-                        disabled={busy === pdf}
-                        onClick={() => handleDownload(pdf)}
-                      >
-                        <Download className="mr-2 w-4 h-4" />
-                        {busy === pdf ? "Preparing…" : "eBook PDF"}
-                      </Button>
-                      <Button
-                        variant="matrix"
-                        size="lg"
-                        disabled={busy === zip}
-                        onClick={() => handleDownload(zip)}
-                      >
-                        <Download className="mr-2 w-4 h-4" />
-                        {busy === zip ? "Preparing…" : "Source Code"}
-                      </Button>
-                      <p className="col-span-2 text-[10px] text-muted-foreground text-center mt-1">
-                        Links expire in 60s for security. Trouble? Email <strong>{INTL_EMAIL}</strong>.
-                      </p>
-                    </div>
-                  ) : !user ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                        <Lock className="w-4 h-4 text-primary shrink-0" />
-                        <p className="text-xs text-foreground/80">
-                          Sign in to purchase and download. Free for verified members.
-                        </p>
-                      </div>
-                      <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
-                        <Link to="/auth">
-                          <LogIn className="mr-2 w-4 h-4" /> Sign in / Create account
-                        </Link>
-                      </Button>
-                    </div>
-                  ) : (
+                  {!paid ? (
                     <div className="space-y-2">
                       {currency === "INR" ? (
                         <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
@@ -251,14 +180,24 @@ const StoreSection = () => {
                         )}
                       </p>
                       <Button
-                        asChild
                         variant="outline"
                         size="sm"
                         className="w-full"
-                        onClick={() => toast.success("Email opened — once approved you'll see download buttons here.")}
+                        onClick={() => setPaid(true)}
                       >
-                        <a href={buildAccessRequestMail(user.email ?? "", user.id)}>
-                          <Mail className="mr-2 w-4 h-4" /> I've paid — request download access
+                        <Unlock className="mr-2 w-4 h-4" /> I've paid — unlock downloads
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button asChild variant="hero" size="lg">
+                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/store-assets/${pdf}`} target="_blank" rel="noopener">
+                          <Download className="mr-2 w-4 h-4" /> eBook PDF
+                        </a>
+                      </Button>
+                      <Button asChild variant="matrix" size="lg">
+                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/store-assets/${zip}`} target="_blank" rel="noopener">
+                          <Download className="mr-2 w-4 h-4" /> Source Code
                         </a>
                       </Button>
                     </div>
