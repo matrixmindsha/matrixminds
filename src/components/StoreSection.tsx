@@ -1,16 +1,25 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail } from "lucide-react";
+import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Lock, LogIn } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth, useHasStoreAccess } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const UPI_ID = "9942658278@ptyes";
 const PAYEE = "Matrix Minds";
 const INTL_EMAIL = "matrixmindsha@gmail.com";
+
 const buildUpi = (amt: number, note: string) =>
   `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE)}&cu=INR&am=${amt}&tn=${encodeURIComponent(note)}`;
 const buildIntlMail = (title: string, usd: number) =>
   `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`International order: ${title} ($${usd})`)}&body=${encodeURIComponent(
     `Hi Matrix Minds,\n\nI'd like to buy "${title}" for $${usd} USD. Please send me PayPal / Wise / card payment instructions.\n\nThanks!`
+  )}`;
+const buildAccessRequestMail = (email: string, uid: string) =>
+  `mailto:${INTL_EMAIL}?subject=${encodeURIComponent("Matrix Minds Store — access request")}&body=${encodeURIComponent(
+    `Hi S. Hareedh,\n\nI've completed payment for a Matrix Minds eBook and need download access.\n\nMy account email: ${email}\nMy account user ID: ${uid}\n\nPayment reference / UTR (if any): \n\nThank you!`
   )}`;
 
 type Currency = "INR" | "USD";
@@ -36,8 +45,8 @@ const PRODUCTS: Product[] = [
     usdPrice: 9,
     tagline: "Founder-grade introduction to AI in 2026.",
     bullets: ["8 chapters · transformers, RAG, prompt engineering", "4 runnable Python scripts (perceptron, NN, LLM, RAG)", "Lifetime updates"],
-    pdf: "/downloads/AI_Mastery.pdf",
-    zip: "/downloads/AI_Mastery_SourceCode.zip",
+    pdf: "AI_Mastery.pdf",
+    zip: "AI_Mastery_SourceCode.zip",
     Icon: Brain,
     accent: "from-primary/20 to-accent/10",
   },
@@ -48,8 +57,8 @@ const PRODUCTS: Product[] = [
     usdPrice: 9,
     tagline: "End-to-end workflow from data to deployed model.",
     bullets: ["8 chapters · trees, boosting, evaluation, MLOps", "5 source files incl. XGBoost + FastAPI serving", "Lifetime updates"],
-    pdf: "/downloads/Machine_Learning.pdf",
-    zip: "/downloads/Machine_Learning_SourceCode.zip",
+    pdf: "Machine_Learning.pdf",
+    zip: "Machine_Learning_SourceCode.zip",
     Icon: Cpu,
     accent: "from-accent/20 to-primary/10",
   },
@@ -60,8 +69,8 @@ const PRODUCTS: Product[] = [
     usdPrice: 9,
     tagline: "SQL, Python, statistics, experimentation.",
     bullets: ["8 chapters · EDA, A/B testing, storytelling", "Pandas, SQL, A/B test & Streamlit dashboard code", "Lifetime updates"],
-    pdf: "/downloads/Data_Science.pdf",
-    zip: "/downloads/Data_Science_SourceCode.zip",
+    pdf: "Data_Science.pdf",
+    zip: "Data_Science_SourceCode.zip",
     Icon: BarChart3,
     accent: "from-primary/20 to-accent/10",
   },
@@ -72,18 +81,38 @@ const PRODUCTS: Product[] = [
     usdPrice: 12,
     tagline: "Legal, hands-on offensive security.",
     bullets: ["8 chapters · OWASP Top 10, pentest workflow, reporting", "5 defensive scripts (scanner, SSRF guard, SQLi safe-vs-unsafe)", "Lifetime updates"],
-    pdf: "/downloads/Ethical_Hacking.pdf",
-    zip: "/downloads/Ethical_Hacking_SourceCode.zip",
+    pdf: "Ethical_Hacking.pdf",
+    zip: "Ethical_Hacking_SourceCode.zip",
     Icon: ShieldAlert,
     accent: "from-accent/20 to-primary/10",
   },
 ];
 
 const StoreSection = () => {
-  const [paid, setPaid] = useState<Record<string, boolean>>({});
   const [currency, setCurrency] = useState<Currency>("INR");
+  const [busy, setBusy] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const { hasAccess, checking } = useHasStoreAccess(user?.id);
 
   const fmt = (p: Product) => (currency === "INR" ? `₹${p.price}` : `$${p.usdPrice}`);
+
+  const handleDownload = async (file: string) => {
+    setBusy(file);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-download", {
+        body: { file },
+      });
+      if (error || !data?.url) {
+        toast.error(data?.error ?? error?.message ?? "Download failed");
+        return;
+      }
+      window.open(data.url as string, "_blank", "noopener");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <section id="store" className="py-20 relative">
@@ -121,7 +150,6 @@ const StoreSection = () => {
         <div className="grid md:grid-cols-2 gap-6">
           {PRODUCTS.map((product) => {
             const { id, title, tagline, bullets, pdf, zip, Icon, accent, price, usdPrice } = product;
-            const isPaid = paid[id];
             return (
               <Card key={id} className={`bg-gradient-to-br ${accent} via-transparent border-primary/30 backdrop-blur-md`}>
                 <CardContent className="p-6 md:p-8">
@@ -157,56 +185,82 @@ const StoreSection = () => {
                     ))}
                   </ul>
 
-                  {!isPaid ? (
-                    <div className="space-y-2">
-                      {currency === "INR" ? (
-                        <>
-                          <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
-                            <a href={buildUpi(price, `${title} — Matrix Minds`)}>
-                              <Smartphone className="mr-2 w-4 h-4" /> Pay ₹{price} via UPI
-                            </a>
-                          </Button>
-                          <p className="text-[10px] text-muted-foreground text-center">
-                            UPI: <span className="font-mono">{UPI_ID}</span>
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
-                            <a href={buildIntlMail(title, usdPrice)}>
-                              <Mail className="mr-2 w-4 h-4" /> Pay ${usdPrice} — Email for PayPal
-                            </a>
-                          </Button>
-                          <p className="text-[10px] text-muted-foreground text-center">
-                            International: PayPal / Wise / card via{" "}
-                            <span className="font-mono">{INTL_EMAIL}</span>
-                          </p>
-                        </>
-                      )}
+                  {/* THREE STATES: signed-in member, signed-in non-member, signed-out */}
+                  {authLoading || checking ? (
+                    <Button disabled variant="outline" size="lg" className="w-full">
+                      Checking access…
+                    </Button>
+                  ) : hasAccess ? (
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => setPaid((p) => ({ ...p, [id]: true }))}
+                        variant="hero"
+                        size="lg"
+                        disabled={busy === pdf}
+                        onClick={() => handleDownload(pdf)}
                       >
-                        I've paid — unlock downloads
+                        <Download className="mr-2 w-4 h-4" />
+                        {busy === pdf ? "Preparing…" : "eBook PDF"}
+                      </Button>
+                      <Button
+                        variant="matrix"
+                        size="lg"
+                        disabled={busy === zip}
+                        onClick={() => handleDownload(zip)}
+                      >
+                        <Download className="mr-2 w-4 h-4" />
+                        {busy === zip ? "Preparing…" : "Source Code"}
+                      </Button>
+                      <p className="col-span-2 text-[10px] text-muted-foreground text-center mt-1">
+                        Links expire in 60s for security. Trouble? Email <strong>{INTL_EMAIL}</strong>.
+                      </p>
+                    </div>
+                  ) : !user ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                        <Lock className="w-4 h-4 text-primary shrink-0" />
+                        <p className="text-xs text-foreground/80">
+                          Sign in to purchase and download. Free for verified members.
+                        </p>
+                      </div>
+                      <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
+                        <Link to="/auth">
+                          <LogIn className="mr-2 w-4 h-4" /> Sign in / Create account
+                        </Link>
                       </Button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button asChild variant="hero" size="lg">
-                        <a href={pdf} download>
-                          <Download className="mr-2 w-4 h-4" /> eBook PDF
-                        </a>
-                      </Button>
-                      <Button asChild variant="matrix" size="lg">
-                        <a href={zip} download>
-                          <Download className="mr-2 w-4 h-4" /> Source Code
-                        </a>
-                      </Button>
-                      <p className="col-span-2 text-[10px] text-muted-foreground text-center mt-1">
-                        Trouble downloading? Email <strong>{INTL_EMAIL}</strong> with your payment ref ID.
+                    <div className="space-y-2">
+                      {currency === "INR" ? (
+                        <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
+                          <a href={buildUpi(price, `${title} — Matrix Minds`)}>
+                            <Smartphone className="mr-2 w-4 h-4" /> Pay ₹{price} via UPI
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
+                          <a href={buildIntlMail(title, usdPrice)}>
+                            <Mail className="mr-2 w-4 h-4" /> Pay ${usdPrice} — Email for PayPal
+                          </a>
+                        </Button>
+                      )}
+                      <p className="text-[10px] text-muted-foreground text-center">
+                        {currency === "INR" ? (
+                          <>UPI: <span className="font-mono">{UPI_ID}</span></>
+                        ) : (
+                          <>International: PayPal / Wise / card via <span className="font-mono">{INTL_EMAIL}</span></>
+                        )}
                       </p>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => toast.success("Email opened — once approved you'll see download buttons here.")}
+                      >
+                        <a href={buildAccessRequestMail(user.email ?? "", user.id)}>
+                          <Mail className="mr-2 w-4 h-4" /> I've paid — request download access
+                        </a>
+                      </Button>
                     </div>
                   )}
                 </CardContent>
