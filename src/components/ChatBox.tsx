@@ -79,9 +79,20 @@ const ChatBox = () => {
     }
   }, []);
 
-  // Auto-scroll to latest message
+  // Auto-scroll only when the user is already near the bottom,
+  // so they can freely scroll up / select text while AI is streaming.
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const anchor = scrollRef.current;
+    if (!anchor) return;
+    const viewport = anchor.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    if (!viewport) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+      return;
+    }
+    const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+    if (distanceFromBottom < 120) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
   }, [messages, isTyping]);
 
 
