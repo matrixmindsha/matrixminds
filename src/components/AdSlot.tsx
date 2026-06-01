@@ -18,6 +18,15 @@ declare global {
  * - Lazy-loaded (only initializes when scrolled near viewport)
  * - Clearly labeled as "Advertisement"
  * - Sits inline in the page flow (no popups, no overlays)
+ *
+ * TODO (AdSense): To serve REAL ads, create ad units in your AdSense
+ * dashboard (https://www.google.com/adsense/) and pass the numeric slot
+ * ID via the `slot` prop, e.g. <AdSlot slot="1234567890" />. While `slot`
+ * is left as "auto", AdSense will only render in Auto-ads mode (which
+ * requires Auto Ads to be enabled at the account level). Status checks:
+ *   1. /ads.txt is live with pub-9086864333742571 ✓
+ *   2. AdSense script is loaded in index.html ✓
+ *   3. Site must be approved in your AdSense console (check there).
  */
 const AdSlot = ({
   slot = "auto",
