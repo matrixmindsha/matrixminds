@@ -1,5 +1,5 @@
 // Returns a short-lived signed URL for a file in the private `store-assets` bucket,
-// but ONLY for callers who are signed in AND have role 'admin' or 'member'.
+// but ONLY for callers who are signed in and approved for that exact product.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -19,6 +19,13 @@ const ALLOWED_FILES = new Set([
   "Ethical_Hacking.pdf",
   "Ethical_Hacking_SourceCode.zip",
 ]);
+
+const PRODUCT_FILES: Record<string, string[]> = {
+  ai: ["AI_Mastery.pdf", "AI_Mastery_SourceCode.zip"],
+  ml: ["Machine_Learning.pdf", "Machine_Learning_SourceCode.zip"],
+  ds: ["Data_Science.pdf", "Data_Science_SourceCode.zip"],
+  eh: ["Ethical_Hacking.pdf", "Ethical_Hacking_SourceCode.zip"],
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -47,6 +54,13 @@ Deno.serve(async (req) => {
 
     // Check role via service-role client (bypasses RLS, reads user_roles)
     const admin = createClient(SUPABASE_URL, SERVICE);
+    const body = await req.json().catch(() => ({}));
+    const file = String(body?.file ?? "");
+    const productId = String(body?.productId ?? "");
+    if (!ALLOWED_FILES.has(file) || !PRODUCT_FILES[productId]?.includes(file)) {
+      return json({ error: "Invalid file" }, 400);
+    }
+
     const { data: roles, error: roleErr } = await admin
       .from("user_roles")
       .select("role")
@@ -56,14 +70,20 @@ Deno.serve(async (req) => {
       return json({ error: "Role check failed" }, 500);
     }
     const has = (r: string) => roles?.some((row: { role: string }) => row.role === r);
-    if (!has("admin") && !has("member")) {
-      return json({ error: "Access denied. Please pay and request access." }, 403);
-    }
+    if (!has("admin")) {
+      const { data: access, error: accessErr } = await admin
+        .from("store_access")
+        .select("id")
+        .eq("user_id", uid)
+        .eq("product_id", productId)
+        .maybeSingle();
 
-    const body = await req.json().catch(() => ({}));
-    const file = String(body?.file ?? "");
-    if (!ALLOWED_FILES.has(file)) {
-      return json({ error: "Invalid file" }, 400);
+      if (accessErr) {
+        return json({ error: "Access check failed" }, 500);
+      }
+      if (!access) {
+        return json({ error: "Access denied. Please pay and request admin approval for this product." }, 403);
+      }
     }
 
     const { data: signed, error: signErr } = await admin

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Lock, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth, useHasStoreAccess } from "@/hooks/useAuth";
+import { useAuth, useStoreAccess } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
 const UPI_ID = "9942658278@ptyes";
@@ -17,10 +17,12 @@ const buildIntlMail = (title: string, usd: number) =>
   `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`International order: ${title} ($${usd})`)}&body=${encodeURIComponent(
     `Hi Matrix Minds,\n\nI'd like to buy "${title}" for $${usd} USD. Please send me PayPal / Wise / card payment instructions.\n\nThanks!`
   )}`;
-const buildAccessMail = (userEmail: string, userId: string) =>
-  `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`Access request after payment`)}&body=${encodeURIComponent(
-    `Hi Matrix Minds,\n\nI have paid for the eBook(s). Please grant me download access.\n\nMy account email: ${userEmail}\nMy user id: ${userId}\n\nPayment reference / UTR: (paste here)\nProduct(s): (e.g. AI Mastery)\n\nThanks!`
+const buildAccessMail = (product: Product, userEmail: string, userId: string, selectedCurrency: Currency) => {
+  const amount = selectedCurrency === "INR" ? `₹${product.price}` : `$${product.usdPrice}`;
+  return `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`Payment proof: ${product.title}`)}&body=${encodeURIComponent(
+    `Hi Matrix Minds,\n\nI paid for "${product.title}" (${amount}). Please verify my payment and unlock downloads for my account only after approval.\n\nAccount email: ${userEmail}\nUser ID: ${userId}\nPayment reference / UTR: (paste here)\nPayment screenshot/link: (attach or paste here)\n\nThanks!`
   )}`;
+};
 
 type Currency = "INR" | "USD";
 
@@ -48,14 +50,14 @@ const StoreSection = () => {
   const [currency, setCurrency] = useState<Currency>("INR");
   const [loading, setLoading] = useState<string | null>(null);
   const { user, loading: authLoading } = useAuth();
-  const { hasAccess, checking } = useHasStoreAccess(user?.id);
+  const { hasProductAccess, checking } = useStoreAccess(user?.id);
 
   const fmt = (p: Product) => (currency === "INR" ? `₹${p.price}` : `$${p.usdPrice}`);
 
-  const handleDownload = async (file: string) => {
+  const handleDownload = async (file: string, productId: string) => {
     setLoading(file);
     try {
-      const { data, error } = await supabase.functions.invoke("get-download", { body: { file } });
+      const { data, error } = await supabase.functions.invoke("get-download", { body: { file, productId } });
       if (error || !data?.url) throw new Error(data?.error || error?.message || "Access denied");
       window.open(data.url, "_blank", "noopener");
     } catch (e: any) {
@@ -101,6 +103,7 @@ const StoreSection = () => {
         <div className="grid md:grid-cols-2 gap-6">
           {PRODUCTS.map((product) => {
             const { id, title, tagline, bullets, pdf, zip, Icon, accent, price, usdPrice } = product;
+            const canDownload = hasProductAccess(id);
             return (
               <Card key={id} className={`bg-gradient-to-br ${accent} via-transparent border-primary/30 backdrop-blur-md`}>
                 <CardContent className="p-6 md:p-8">
@@ -130,12 +133,12 @@ const StoreSection = () => {
                     ))}
                   </ul>
 
-                  {ready && hasAccess ? (
+                  {ready && canDownload ? (
                     <div className="grid grid-cols-2 gap-2">
-                      <Button variant="hero" size="lg" disabled={loading === pdf} onClick={() => handleDownload(pdf)}>
+                      <Button variant="hero" size="lg" disabled={loading === pdf} onClick={() => handleDownload(pdf, id)}>
                         <Download className="mr-2 w-4 h-4" /> {loading === pdf ? "..." : "eBook PDF"}
                       </Button>
-                      <Button variant="matrix" size="lg" disabled={loading === zip} onClick={() => handleDownload(zip)}>
+                      <Button variant="matrix" size="lg" disabled={loading === zip} onClick={() => handleDownload(zip, id)}>
                         <Download className="mr-2 w-4 h-4" /> {loading === zip ? "..." : "Source Code"}
                       </Button>
                     </div>
@@ -174,8 +177,8 @@ const StoreSection = () => {
                         </Button>
                       ) : (
                         <Button asChild variant="outline" size="sm" className="w-full">
-                          <a href={buildAccessMail(user.email || "", user.id)}>
-                            <Mail className="mr-2 w-4 h-4" /> I've paid — request access
+                          <a href={buildAccessMail(product, user.email || "", user.id, currency)}>
+                            <Mail className="mr-2 w-4 h-4" /> Email payment proof for approval
                           </a>
                         </Button>
                       )}
@@ -188,7 +191,7 @@ const StoreSection = () => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-8 max-w-2xl mx-auto">
-          Downloads are protected. After you pay, click <strong>"I've paid — request access"</strong> and we'll unlock your account within hours.
+          Downloads are protected. After payment, email your proof for admin approval; logging in alone will never unlock paid resources.
           All content is original, drafted by S. Hareedh for Matrix Minds. Ethical Hacking material is for authorised, legal practice only.
         </p>
       </div>
