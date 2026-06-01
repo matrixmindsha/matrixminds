@@ -73,7 +73,12 @@ const StoreSection = () => {
     <section id="store" className="py-20 relative">
       <div className="container mx-auto px-4">
         {/* Admin gate bar */}
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end items-center gap-2 mb-4">
+          {isAdmin && (
+            <span className="px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-accent text-[11px] font-orbitron font-bold tracking-wider">
+              ADMIN · FREE ACCESS
+            </span>
+          )}
           {!user ? (
             <Button asChild variant="outline" size="sm" className="font-orbitron">
               <Link to="/auth">
@@ -81,15 +86,14 @@ const StoreSection = () => {
               </Link>
             </Button>
           ) : isAdmin ? (
-            <div className="flex gap-2 items-center">
-              <span className="text-xs font-orbitron text-accent">ADMIN MODE</span>
+            <>
               <Button asChild variant="outline" size="sm" className="font-orbitron">
                 <Link to="/analytics"><BarChart className="mr-2 w-4 h-4" /> Analytics</Link>
               </Button>
               <Button variant="outline" size="sm" className="font-orbitron" onClick={handleSignOut}>
                 <LogOut className="mr-2 w-4 h-4" /> Sign out
               </Button>
-            </div>
+            </>
           ) : (
             <Button variant="outline" size="sm" className="font-orbitron" onClick={handleSignOut}>
               <LogOut className="mr-2 w-4 h-4" /> Sign out

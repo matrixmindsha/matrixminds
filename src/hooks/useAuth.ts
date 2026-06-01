@@ -37,14 +37,13 @@ export function useStoreAccess(userId: string | undefined) {
     }
     setChecking(true);
     Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
       supabase.from("store_access").select("product_id").eq("user_id", userId),
-    ]).then(([rolesResult, accessResult]) => {
-        const roles = (rolesResult.data ?? []).map((r) => r.role as string);
-        setIsAdmin(roles.includes("admin"));
-        setProductIds((accessResult.data ?? []).map((row) => row.product_id));
-        setChecking(false);
-      });
+    ]).then(([roleRes, accessRes]) => {
+      setIsAdmin(roleRes.data === true);
+      setProductIds((accessRes.data ?? []).map((row) => row.product_id));
+      setChecking(false);
+    });
   }, [userId]);
 
   const hasProductAccess = (productId: string) => isAdmin || productIds.includes(productId);
