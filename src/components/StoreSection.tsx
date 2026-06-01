@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Lock, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth, useHasStoreAccess } from "@/hooks/useAuth";
+import { useAuth, useStoreAccess } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
 const UPI_ID = "9942658278@ptyes";
@@ -50,14 +50,14 @@ const StoreSection = () => {
   const [currency, setCurrency] = useState<Currency>("INR");
   const [loading, setLoading] = useState<string | null>(null);
   const { user, loading: authLoading } = useAuth();
-  const { hasAccess, checking } = useHasStoreAccess(user?.id);
+  const { hasProductAccess, checking } = useStoreAccess(user?.id);
 
   const fmt = (p: Product) => (currency === "INR" ? `₹${p.price}` : `$${p.usdPrice}`);
 
-  const handleDownload = async (file: string) => {
+  const handleDownload = async (file: string, productId: string) => {
     setLoading(file);
     try {
-      const { data, error } = await supabase.functions.invoke("get-download", { body: { file } });
+      const { data, error } = await supabase.functions.invoke("get-download", { body: { file, productId } });
       if (error || !data?.url) throw new Error(data?.error || error?.message || "Access denied");
       window.open(data.url, "_blank", "noopener");
     } catch (e: any) {
@@ -103,6 +103,7 @@ const StoreSection = () => {
         <div className="grid md:grid-cols-2 gap-6">
           {PRODUCTS.map((product) => {
             const { id, title, tagline, bullets, pdf, zip, Icon, accent, price, usdPrice } = product;
+            const canDownload = hasProductAccess(id);
             return (
               <Card key={id} className={`bg-gradient-to-br ${accent} via-transparent border-primary/30 backdrop-blur-md`}>
                 <CardContent className="p-6 md:p-8">
@@ -132,12 +133,12 @@ const StoreSection = () => {
                     ))}
                   </ul>
 
-                  {ready && hasAccess ? (
+                  {ready && canDownload ? (
                     <div className="grid grid-cols-2 gap-2">
-                      <Button variant="hero" size="lg" disabled={loading === pdf} onClick={() => handleDownload(pdf)}>
+                      <Button variant="hero" size="lg" disabled={loading === pdf} onClick={() => handleDownload(pdf, id)}>
                         <Download className="mr-2 w-4 h-4" /> {loading === pdf ? "..." : "eBook PDF"}
                       </Button>
-                      <Button variant="matrix" size="lg" disabled={loading === zip} onClick={() => handleDownload(zip)}>
+                      <Button variant="matrix" size="lg" disabled={loading === zip} onClick={() => handleDownload(zip, id)}>
                         <Download className="mr-2 w-4 h-4" /> {loading === zip ? "..." : "Source Code"}
                       </Button>
                     </div>
