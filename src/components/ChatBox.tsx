@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Lightbulb, Target, Zap } from "lucide-react";
+import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Lightbulb, Target, Zap, Copy } from "lucide-react";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 import { useAIChat } from "@/hooks/useAIChat";
 import { useToast } from "@/hooks/use-toast";
@@ -79,9 +79,20 @@ const ChatBox = () => {
     }
   }, []);
 
-  // Auto-scroll to latest message
+  // Auto-scroll only when the user is already near the bottom,
+  // so they can freely scroll up / select text while AI is streaming.
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const anchor = scrollRef.current;
+    if (!anchor) return;
+    const viewport = anchor.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    if (!viewport) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+      return;
+    }
+    const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+    if (distanceFromBottom < 120) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
   }, [messages, isTyping]);
 
 
@@ -368,7 +379,7 @@ const ChatBox = () => {
                       {message.isBot && (
                         <Bot className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
                       )}
-                      <div className="text-sm leading-relaxed flex-1 prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-pre:my-2 prose-code:text-xs prose-pre:text-xs break-words">
+                      <div className="text-sm leading-relaxed flex-1 prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-pre:my-2 prose-code:text-xs prose-pre:text-xs break-words select-text [user-select:text]">
                         {message.isBot ? (
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {message.text}
@@ -378,19 +389,38 @@ const ChatBox = () => {
                         )}
                       </div>
                       {message.isBot && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 hover:bg-primary/20 flex-shrink-0"
-                          onClick={() => {
-                            if ('speechSynthesis' in window) {
-                              const utterance = new SpeechSynthesisUtterance(message.text.replace(/[*_`#>\-]/g, ''));
-                              speechSynthesis.speak(utterance);
-                            }
-                          }}
-                        >
-                          <Volume2 className="w-3 h-3" />
-                        </Button>
+                        <div className="flex flex-col gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 hover:bg-primary/20"
+                            title="Copy"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(message.text);
+                                toast({ title: "Copied", description: "Reply copied to clipboard" });
+                              } catch {
+                                toast({ title: "Copy failed", variant: "destructive" });
+                              }
+                            }}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 hover:bg-primary/20"
+                            title="Read aloud"
+                            onClick={() => {
+                              if ('speechSynthesis' in window) {
+                                const utterance = new SpeechSynthesisUtterance(message.text.replace(/[*_`#>\-]/g, ''));
+                                speechSynthesis.speak(utterance);
+                              }
+                            }}
+                          >
+                            <Volume2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
