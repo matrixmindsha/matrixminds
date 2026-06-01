@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Unlock } from "lucide-react";
+import { Brain, Cpu, BarChart3, ShieldAlert, Download, Smartphone, Check, Mail, Lock, LogIn } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth, useHasStoreAccess } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const UPI_ID = "9942658278@ptyes";
 const PAYEE = "Matrix Minds";
@@ -12,6 +16,10 @@ const buildUpi = (amt: number, note: string) =>
 const buildIntlMail = (title: string, usd: number) =>
   `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`International order: ${title} ($${usd})`)}&body=${encodeURIComponent(
     `Hi Matrix Minds,\n\nI'd like to buy "${title}" for $${usd} USD. Please send me PayPal / Wise / card payment instructions.\n\nThanks!`
+  )}`;
+const buildAccessMail = (userEmail: string, userId: string) =>
+  `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`Access request after payment`)}&body=${encodeURIComponent(
+    `Hi Matrix Minds,\n\nI have paid for the eBook(s). Please grant me download access.\n\nMy account email: ${userEmail}\nMy user id: ${userId}\n\nPayment reference / UTR: (paste here)\nProduct(s): (e.g. AI Mastery)\n\nThanks!`
   )}`;
 
 type Currency = "INR" | "USD";
@@ -30,61 +38,34 @@ type Product = {
 };
 
 const PRODUCTS: Product[] = [
-  {
-    id: "ai",
-    title: "AI Mastery",
-    price: 499,
-    usdPrice: 9,
-    tagline: "Founder-grade introduction to AI in 2026.",
-    bullets: ["8 chapters · transformers, RAG, prompt engineering", "4 runnable Python scripts (perceptron, NN, LLM, RAG)", "Lifetime updates"],
-    pdf: "AI_Mastery.pdf",
-    zip: "AI_Mastery_SourceCode.zip",
-    Icon: Brain,
-    accent: "from-primary/20 to-accent/10",
-  },
-  {
-    id: "ml",
-    title: "Machine Learning",
-    price: 499,
-    usdPrice: 9,
-    tagline: "End-to-end workflow from data to deployed model.",
-    bullets: ["8 chapters · trees, boosting, evaluation, MLOps", "5 source files incl. XGBoost + FastAPI serving", "Lifetime updates"],
-    pdf: "Machine_Learning.pdf",
-    zip: "Machine_Learning_SourceCode.zip",
-    Icon: Cpu,
-    accent: "from-accent/20 to-primary/10",
-  },
-  {
-    id: "ds",
-    title: "Data Science",
-    price: 499,
-    usdPrice: 9,
-    tagline: "SQL, Python, statistics, experimentation.",
-    bullets: ["8 chapters · EDA, A/B testing, storytelling", "Pandas, SQL, A/B test & Streamlit dashboard code", "Lifetime updates"],
-    pdf: "Data_Science.pdf",
-    zip: "Data_Science_SourceCode.zip",
-    Icon: BarChart3,
-    accent: "from-primary/20 to-accent/10",
-  },
-  {
-    id: "eh",
-    title: "Ethical Hacking",
-    price: 699,
-    usdPrice: 12,
-    tagline: "Legal, hands-on offensive security.",
-    bullets: ["8 chapters · OWASP Top 10, pentest workflow, reporting", "5 defensive scripts (scanner, SSRF guard, SQLi safe-vs-unsafe)", "Lifetime updates"],
-    pdf: "Ethical_Hacking.pdf",
-    zip: "Ethical_Hacking_SourceCode.zip",
-    Icon: ShieldAlert,
-    accent: "from-accent/20 to-primary/10",
-  },
+  { id: "ai", title: "AI Mastery", price: 499, usdPrice: 9, tagline: "Founder-grade introduction to AI in 2026.", bullets: ["8 chapters · transformers, RAG, prompt engineering", "4 runnable Python scripts (perceptron, NN, LLM, RAG)", "Lifetime updates"], pdf: "AI_Mastery.pdf", zip: "AI_Mastery_SourceCode.zip", Icon: Brain, accent: "from-primary/20 to-accent/10" },
+  { id: "ml", title: "Machine Learning", price: 499, usdPrice: 9, tagline: "End-to-end workflow from data to deployed model.", bullets: ["8 chapters · trees, boosting, evaluation, MLOps", "5 source files incl. XGBoost + FastAPI serving", "Lifetime updates"], pdf: "Machine_Learning.pdf", zip: "Machine_Learning_SourceCode.zip", Icon: Cpu, accent: "from-accent/20 to-primary/10" },
+  { id: "ds", title: "Data Science", price: 499, usdPrice: 9, tagline: "SQL, Python, statistics, experimentation.", bullets: ["8 chapters · EDA, A/B testing, storytelling", "Pandas, SQL, A/B test & Streamlit dashboard code", "Lifetime updates"], pdf: "Data_Science.pdf", zip: "Data_Science_SourceCode.zip", Icon: BarChart3, accent: "from-primary/20 to-accent/10" },
+  { id: "eh", title: "Ethical Hacking", price: 699, usdPrice: 12, tagline: "Legal, hands-on offensive security.", bullets: ["8 chapters · OWASP Top 10, pentest workflow, reporting", "5 defensive scripts (scanner, SSRF guard, SQLi safe-vs-unsafe)", "Lifetime updates"], pdf: "Ethical_Hacking.pdf", zip: "Ethical_Hacking_SourceCode.zip", Icon: ShieldAlert, accent: "from-accent/20 to-primary/10" },
 ];
 
 const StoreSection = () => {
   const [currency, setCurrency] = useState<Currency>("INR");
-  const [paid, setPaid] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const { hasAccess, checking } = useHasStoreAccess(user?.id);
 
   const fmt = (p: Product) => (currency === "INR" ? `₹${p.price}` : `$${p.usdPrice}`);
+
+  const handleDownload = async (file: string) => {
+    setLoading(file);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-download", { body: { file } });
+      if (error || !data?.url) throw new Error(data?.error || error?.message || "Access denied");
+      window.open(data.url, "_blank", "noopener");
+    } catch (e: any) {
+      toast({ title: "Download blocked", description: e.message || "Please pay and request access.", variant: "destructive" });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const ready = !authLoading && !checking;
 
   return (
     <section id="store" className="py-20 relative">
@@ -107,9 +88,7 @@ const StoreSection = () => {
                 key={c}
                 onClick={() => setCurrency(c)}
                 className={`px-4 py-1.5 text-sm font-orbitron font-bold rounded-full transition ${
-                  currency === c
-                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                  currency === c ? "bg-gradient-to-r from-primary to-accent text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
                 aria-pressed={currency === c}
               >
@@ -130,18 +109,12 @@ const StoreSection = () => {
                       <Icon className="w-7 h-7 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-orbitron text-xl md:text-2xl font-black text-foreground">
-                        {title}
-                      </h3>
+                      <h3 className="font-orbitron text-xl md:text-2xl font-black text-foreground">{title}</h3>
                       <p className="text-sm text-muted-foreground">{tagline}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-orbitron text-2xl md:text-3xl font-black text-accent">
-                        {fmt(product)}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        one-time
-                      </div>
+                      <div className="font-orbitron text-2xl md:text-3xl font-black text-accent">{fmt(product)}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">one-time</div>
                       <div className="text-[10px] text-muted-foreground mt-0.5">
                         {currency === "INR" ? `≈ $${usdPrice}` : `≈ ₹${price}`}
                       </div>
@@ -157,7 +130,16 @@ const StoreSection = () => {
                     ))}
                   </ul>
 
-                  {!paid ? (
+                  {ready && hasAccess ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="hero" size="lg" disabled={loading === pdf} onClick={() => handleDownload(pdf)}>
+                        <Download className="mr-2 w-4 h-4" /> {loading === pdf ? "..." : "eBook PDF"}
+                      </Button>
+                      <Button variant="matrix" size="lg" disabled={loading === zip} onClick={() => handleDownload(zip)}>
+                        <Download className="mr-2 w-4 h-4" /> {loading === zip ? "..." : "Source Code"}
+                      </Button>
+                    </div>
+                  ) : (
                     <div className="space-y-2">
                       {currency === "INR" ? (
                         <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
@@ -179,27 +161,24 @@ const StoreSection = () => {
                           <>International: PayPal / Wise / card via <span className="font-mono">{INTL_EMAIL}</span></>
                         )}
                       </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => setPaid(true)}
-                      >
-                        <Unlock className="mr-2 w-4 h-4" /> I've paid — unlock downloads
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button asChild variant="hero" size="lg">
-                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/store-assets/${pdf}`} target="_blank" rel="noopener">
-                          <Download className="mr-2 w-4 h-4" /> eBook PDF
-                        </a>
-                      </Button>
-                      <Button asChild variant="matrix" size="lg">
-                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/store-assets/${zip}`} target="_blank" rel="noopener">
-                          <Download className="mr-2 w-4 h-4" /> Source Code
-                        </a>
-                      </Button>
+
+                      {!ready ? (
+                        <Button variant="outline" size="sm" className="w-full" disabled>
+                          <Lock className="mr-2 w-4 h-4" /> Checking access…
+                        </Button>
+                      ) : !user ? (
+                        <Button asChild variant="outline" size="sm" className="w-full">
+                          <Link to="/auth">
+                            <LogIn className="mr-2 w-4 h-4" /> Sign in to access after paying
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button asChild variant="outline" size="sm" className="w-full">
+                          <a href={buildAccessMail(user.email || "", user.id)}>
+                            <Mail className="mr-2 w-4 h-4" /> I've paid — request access
+                          </a>
+                        </Button>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -209,8 +188,8 @@ const StoreSection = () => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-8 max-w-2xl mx-auto">
-          All content is original, drafted by S. Hareedh for Matrix Minds. Source code is MIT-licensed for
-          educational use. Ethical Hacking material is for authorised, legal practice only.
+          Downloads are protected. After you pay, click <strong>"I've paid — request access"</strong> and we'll unlock your account within hours.
+          All content is original, drafted by S. Hareedh for Matrix Minds. Ethical Hacking material is for authorised, legal practice only.
         </p>
       </div>
     </section>
