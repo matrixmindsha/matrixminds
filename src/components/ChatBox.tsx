@@ -434,7 +434,7 @@ const ChatBox = () => {
             <TabsTrigger value="help" className="text-xs">Quick Help</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="chat" className="flex-1 flex flex-col">
+          <TabsContent value="chat" className="flex-1 flex flex-col relative">
             <ScrollArea className="flex-1 p-4 max-h-[350px]">
               {messages.map((message) => (
                 <div
