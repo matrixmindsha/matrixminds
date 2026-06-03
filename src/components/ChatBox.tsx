@@ -44,8 +44,8 @@ const ChatBox = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLElement | null>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
   const [showJump, setShowJump] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [imageMode, setImageMode] = useState(false);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
