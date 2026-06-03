@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Lightbulb, Target, Zap, Copy, Image as ImageIcon, Paperclip, ChevronDown, Loader2 } from "lucide-react";
+import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, VolumeX, Play, Lightbulb, Target, Zap, Copy, Image as ImageIcon, Paperclip, ChevronDown, Loader2, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 import { useAIChat } from "@/hooks/useAIChat";
@@ -44,8 +44,8 @@ const ChatBox = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLElement | null>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
   const [showJump, setShowJump] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [imageMode, setImageMode] = useState(false);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -88,9 +88,8 @@ const ChatBox = () => {
     }
   }, []);
 
-  // Track scroll position to decide whether to auto-follow streaming text.
-  // The moment the user scrolls up, auto-scroll is OFF until they scroll back to bottom
-  // (or click the Jump-to-latest button).
+  // Pure manual scroll. We never force-scroll on streaming.
+  // A "Jump to latest" button appears whenever the user is not at the bottom.
   useEffect(() => {
     if (!isOpen) return;
     const anchor = scrollRef.current;
@@ -100,24 +99,26 @@ const ChatBox = () => {
     if (!viewport) return;
     const onScroll = () => {
       const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-      const atBottom = distance < 40;
-      setAutoScroll(atBottom);
-      setShowJump(!atBottom);
+      setShowJump(distance > 40);
     };
     viewport.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => viewport.removeEventListener('scroll', onScroll);
   }, [isOpen, activeTab]);
 
+  // When new messages arrive while streaming, only update the jump-button visibility.
   useEffect(() => {
-    if (!autoScroll) return;
-    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isTyping, autoScroll]);
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+    setShowJump(distance > 40);
+  }, [messages, isTyping]);
 
   const jumpToLatest = () => {
-    setAutoScroll(true);
     setShowJump(false);
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
+
 
   const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -266,11 +267,11 @@ const ChatBox = () => {
         },
         () => {
           setIsTyping(false);
-          // Speak the response
-          if ('speechSynthesis' in window && assistantResponse) {
+          // Only speak if the user has enabled voice mode.
+          if (voiceEnabled && 'speechSynthesis' in window && assistantResponse) {
             const cleanText = assistantResponse.replace(/[🚀🧠📞🎉👋🤔📧☎️🌍⚡🔒🎯🌐]/g, '');
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.rate = 0.8;
+            utterance.rate = 0.9;
             speechSynthesis.speak(utterance);
           }
         }
@@ -311,8 +312,9 @@ const ChatBox = () => {
     }
   };
 
-  // Drag functionality
+  // Drag functionality (disabled on small screens)
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) return;
     if ((e.target as HTMLElement).closest('.drag-handle')) {
       setIsDragging(true);
       setDragStart({
@@ -396,36 +398,77 @@ const ChatBox = () => {
   }
 
   return (
-    <div 
-      className="fixed bottom-20 right-6 z-50 w-96"
+    <div
+      className="fixed z-50 inset-x-2 bottom-2 sm:inset-x-auto sm:bottom-20 sm:right-6 sm:w-96"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         cursor: isDragging ? 'grabbing' : 'default'
       }}
       onMouseDown={handleMouseDown}
     >
-      <Card ref={cardRef} className="h-[600px] shadow-2xl border border-primary/30 bg-background/95 backdrop-blur-xl overflow-hidden"
-            style={{ userSelect: isDragging ? 'none' : 'auto' }}>
-        <div className="drag-handle flex items-center justify-between p-4 bg-gradient-to-r from-primary via-accent to-primary text-white border-b border-primary/30 cursor-grab active:cursor-grabbing">
-          <div className="flex items-center gap-3 pointer-events-none">
-            <div className="relative">
+      <Card
+        ref={cardRef}
+        className="h-[85vh] sm:h-[600px] max-h-[calc(100vh-1rem)] shadow-2xl border border-primary/30 bg-background/95 backdrop-blur-xl overflow-hidden flex flex-col"
+        style={{ userSelect: isDragging ? 'none' : 'auto' }}
+      >
+        <div className="drag-handle flex items-center justify-between p-3 bg-gradient-to-r from-primary via-accent to-primary text-white border-b border-primary/30 cursor-grab active:cursor-grabbing">
+          <div className="flex items-center gap-2 pointer-events-none min-w-0">
+            <div className="relative flex-shrink-0">
               <img src={harAIAvatar} alt="AI Assistant" className="w-8 h-8 rounded-full" />
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
-            <div>
-              <h3 className="font-semibold text-sm">Matrix Minds AI</h3>
-              <p className="text-xs opacity-90">Online • Ready to help</p>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm truncate">Matrix Minds AI</h3>
+              <p className="text-xs opacity-90 truncate">Online • Ready to help</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="text-white hover:bg-white/20 h-8 w-8 p-0 pointer-events-auto"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1 pointer-events-auto flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setVoiceEnabled(v => {
+                  const next = !v;
+                  if (!next && 'speechSynthesis' in window) speechSynthesis.cancel();
+                  toast({
+                    title: next ? "Voice ON" : "Voice OFF",
+                    description: next ? "AI replies will be read aloud." : "AI replies will stay silent.",
+                  });
+                  return next;
+                });
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              title={voiceEnabled ? "Mute AI voice" : "Enable AI voice"}
+            >
+              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if ('speechSynthesis' in window) speechSynthesis.cancel();
+                setIsOpen(false);
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              title="Minimize"
+            >
+              <Minus className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if ('speechSynthesis' in window) speechSynthesis.cancel();
+                setIsOpen(false);
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-3 bg-muted/50">
@@ -435,7 +478,7 @@ const ChatBox = () => {
           </TabsList>
 
           <TabsContent value="chat" className="flex-1 flex flex-col relative">
-            <ScrollArea className="flex-1 p-4 max-h-[350px]">
+            <ScrollArea className="flex-1 p-4 min-h-0">
               {messages.map((message) => (
                 <div
                   key={message.id}
