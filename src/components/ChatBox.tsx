@@ -605,6 +605,58 @@ const ChatBox = () => {
 
         {activeTab === "chat" && (
           <div className="p-4 border-t border-primary/30 bg-background/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant={imageMode ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 text-[11px] px-2 gap-1"
+                  onClick={() => setImageMode(m => !m)}
+                  title="Toggle image generation mode"
+                >
+                  <ImageIcon className="w-3 h-3" />
+                  {imageMode ? "Image mode ON" : "Generate image"}
+                </Button>
+              </div>
+              {imageMode && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleReferenceUpload}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] px-2 gap-1"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Attach reference photo"
+                  >
+                    <Paperclip className="w-3 h-3" />
+                    {referenceImage ? "Photo ✓" : "Attach photo"}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {imageMode && referenceImage && (
+              <div className="mb-2 flex items-center gap-2">
+                <img src={referenceImage} alt="ref" className="w-12 h-12 rounded object-cover border border-primary/30" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-xs"
+                  onClick={() => setReferenceImage(null)}
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
+
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Textarea
@@ -612,18 +664,18 @@ const ChatBox = () => {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your message or use voice..."
+                  placeholder={imageMode ? "Describe the image to generate..." : "Type your message or use voice..."}
                   className="min-h-[40px] max-h-[100px] resize-none bg-muted/50 border-primary/30 focus:border-primary backdrop-blur-sm pr-20"
                   rows={1}
                 />
-                {speechSupported && (
+                {speechSupported && !imageMode && (
                   <div className="absolute right-12 top-1 flex gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       className={`h-8 w-8 p-0 ${
-                        isListening 
-                          ? "text-red-500 hover:text-red-600 animate-pulse" 
+                        isListening
+                          ? "text-red-500 hover:text-red-600 animate-pulse"
                           : "text-cyan-500 hover:text-cyan-600"
                       }`}
                       onClick={isListening ? stopListening : startListening}
@@ -635,15 +687,15 @@ const ChatBox = () => {
                 )}
               </div>
               <Button
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isLoading}
+                onClick={imageMode ? handleGenerateImage : handleSendMessage}
+                disabled={!inputMessage.trim() || isLoading || isGeneratingImage}
                 className="h-10 w-10 p-0 bg-gradient-to-br from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-primary/50 transition-all duration-300 disabled:opacity-50"
+                title={imageMode ? "Generate image" : "Send message"}
               >
-                <Send className="w-4 h-4" />
+                {isGeneratingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : imageMode ? <Sparkles className="w-4 h-4" /> : <Send className="w-4 h-4" />}
               </Button>
-
             </div>
-            
+
             {isListening && (
               <div className="mt-2 flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs animate-pulse bg-cyan-500/20 text-cyan-600 border-cyan-500/30">
@@ -651,12 +703,13 @@ const ChatBox = () => {
                 </Badge>
               </div>
             )}
-            
+
             <div className="mt-2 text-xs text-muted-foreground text-center">
               🎉 <strong>FREE CONSULTATION NOW</strong> • Offer ends soon!
             </div>
           </div>
         )}
+
       </Card>
     </div>
   );
