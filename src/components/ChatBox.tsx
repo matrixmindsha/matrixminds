@@ -88,9 +88,8 @@ const ChatBox = () => {
     }
   }, []);
 
-  // Track scroll position to decide whether to auto-follow streaming text.
-  // The moment the user scrolls up, auto-scroll is OFF until they scroll back to bottom
-  // (or click the Jump-to-latest button).
+  // Pure manual scroll. We never force-scroll on streaming.
+  // A "Jump to latest" button appears whenever the user is not at the bottom.
   useEffect(() => {
     if (!isOpen) return;
     const anchor = scrollRef.current;
@@ -100,24 +99,26 @@ const ChatBox = () => {
     if (!viewport) return;
     const onScroll = () => {
       const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-      const atBottom = distance < 40;
-      setAutoScroll(atBottom);
-      setShowJump(!atBottom);
+      setShowJump(distance > 40);
     };
     viewport.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => viewport.removeEventListener('scroll', onScroll);
   }, [isOpen, activeTab]);
 
+  // When new messages arrive while streaming, only update the jump-button visibility.
   useEffect(() => {
-    if (!autoScroll) return;
-    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isTyping, autoScroll]);
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+    setShowJump(distance > 40);
+  }, [messages, isTyping]);
 
   const jumpToLatest = () => {
-    setAutoScroll(true);
     setShowJump(false);
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
+
 
   const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
