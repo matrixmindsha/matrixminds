@@ -511,7 +511,17 @@ const ChatBox = () => {
               {isTyping && <TypingIndicator />}
               <div ref={scrollRef} />
             </ScrollArea>
+            {showJump && (
+              <button
+                onClick={jumpToLatest}
+                className="absolute bottom-[90px] right-4 z-10 bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:scale-105 transition-transform"
+                title="Jump to latest"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
           </TabsContent>
+
 
 
           <TabsContent value="start" className="flex-1 p-4">
