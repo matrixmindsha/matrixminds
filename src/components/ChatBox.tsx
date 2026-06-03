@@ -398,36 +398,77 @@ const ChatBox = () => {
   }
 
   return (
-    <div 
-      className="fixed bottom-20 right-6 z-50 w-96"
+    <div
+      className="fixed z-50 inset-x-2 bottom-2 sm:inset-x-auto sm:bottom-20 sm:right-6 sm:w-96"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         cursor: isDragging ? 'grabbing' : 'default'
       }}
       onMouseDown={handleMouseDown}
     >
-      <Card ref={cardRef} className="h-[600px] shadow-2xl border border-primary/30 bg-background/95 backdrop-blur-xl overflow-hidden"
-            style={{ userSelect: isDragging ? 'none' : 'auto' }}>
-        <div className="drag-handle flex items-center justify-between p-4 bg-gradient-to-r from-primary via-accent to-primary text-white border-b border-primary/30 cursor-grab active:cursor-grabbing">
-          <div className="flex items-center gap-3 pointer-events-none">
-            <div className="relative">
+      <Card
+        ref={cardRef}
+        className="h-[85vh] sm:h-[600px] max-h-[calc(100vh-1rem)] shadow-2xl border border-primary/30 bg-background/95 backdrop-blur-xl overflow-hidden flex flex-col"
+        style={{ userSelect: isDragging ? 'none' : 'auto' }}
+      >
+        <div className="drag-handle flex items-center justify-between p-3 bg-gradient-to-r from-primary via-accent to-primary text-white border-b border-primary/30 cursor-grab active:cursor-grabbing">
+          <div className="flex items-center gap-2 pointer-events-none min-w-0">
+            <div className="relative flex-shrink-0">
               <img src={harAIAvatar} alt="AI Assistant" className="w-8 h-8 rounded-full" />
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
-            <div>
-              <h3 className="font-semibold text-sm">Matrix Minds AI</h3>
-              <p className="text-xs opacity-90">Online • Ready to help</p>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm truncate">Matrix Minds AI</h3>
+              <p className="text-xs opacity-90 truncate">Online • Ready to help</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="text-white hover:bg-white/20 h-8 w-8 p-0 pointer-events-auto"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1 pointer-events-auto flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setVoiceEnabled(v => {
+                  const next = !v;
+                  if (!next && 'speechSynthesis' in window) speechSynthesis.cancel();
+                  toast({
+                    title: next ? "Voice ON" : "Voice OFF",
+                    description: next ? "AI replies will be read aloud." : "AI replies will stay silent.",
+                  });
+                  return next;
+                });
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              title={voiceEnabled ? "Mute AI voice" : "Enable AI voice"}
+            >
+              {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if ('speechSynthesis' in window) speechSynthesis.cancel();
+                setIsOpen(false);
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              title="Minimize"
+            >
+              <Minus className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if ('speechSynthesis' in window) speechSynthesis.cancel();
+                setIsOpen(false);
+              }}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-3 bg-muted/50">
