@@ -18,6 +18,7 @@ interface Message {
   text: string;
   isBot: boolean;
   timestamp: Date;
+  imageUrl?: string;
 }
 
 const ChatBox = () => {
