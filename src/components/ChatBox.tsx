@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Lightbulb, Target, Zap, Copy } from "lucide-react";
+import { Send, Mic, MicOff, MessageCircle, X, Sparkles, Bot, Volume2, Play, Lightbulb, Target, Zap, Copy, Image as ImageIcon, Paperclip, ChevronDown, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import harAIAvatar from "@/assets/har-ai-avatar.png";
 import { useAIChat } from "@/hooks/useAIChat";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ interface Message {
   text: string;
   isBot: boolean;
   timestamp: Date;
+  imageUrl?: string;
 }
 
 const ChatBox = () => {
@@ -41,6 +43,13 @@ const ChatBox = () => {
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLElement | null>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [showJump, setShowJump] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { streamChat, isLoading } = useAIChat();
   const { toast } = useToast();
 
@@ -79,21 +88,87 @@ const ChatBox = () => {
     }
   }, []);
 
-  // Auto-scroll only when the user is already near the bottom,
-  // so they can freely scroll up / select text while AI is streaming.
+  // Track scroll position to decide whether to auto-follow streaming text.
+  // The moment the user scrolls up, auto-scroll is OFF until they scroll back to bottom
+  // (or click the Jump-to-latest button).
   useEffect(() => {
+    if (!isOpen) return;
     const anchor = scrollRef.current;
     if (!anchor) return;
     const viewport = anchor.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
-    if (!viewport) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+    viewportRef.current = viewport;
+    if (!viewport) return;
+    const onScroll = () => {
+      const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      const atBottom = distance < 40;
+      setAutoScroll(atBottom);
+      setShowJump(!atBottom);
+    };
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', onScroll);
+  }, [isOpen, activeTab]);
+
+  useEffect(() => {
+    if (!autoScroll) return;
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, isTyping, autoScroll]);
+
+  const jumpToLatest = () => {
+    setAutoScroll(true);
+    setShowJump(false);
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  };
+
+  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 4 MB.", variant: "destructive" });
       return;
     }
-    const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-    if (distanceFromBottom < 120) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+    const reader = new FileReader();
+    reader.onload = () => setReferenceImage(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleGenerateImage = async () => {
+    if (!inputMessage.trim() || isGeneratingImage) return;
+    const prompt = inputMessage;
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      text: `🎨 Generate: ${prompt}`,
+      isBot: false,
+      timestamp: new Date(),
+      imageUrl: referenceImage || undefined,
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setInputMessage("");
+    setIsGeneratingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt, referenceImage },
+      });
+      if (error) throw error;
+      if (!data?.imageUrl) throw new Error('No image returned');
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        text: 'Here is your generated image:',
+        isBot: true,
+        timestamp: new Date(),
+        imageUrl: data.imageUrl,
+      }]);
+      setReferenceImage(null);
+    } catch (err: any) {
+      toast({
+        title: "Image generation failed",
+        description: err?.message || 'Try again later.',
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
     }
-  }, [messages, isTyping]);
+  };
+
 
 
   const predefinedResponses: { [key: string]: string } = {
@@ -359,7 +434,7 @@ const ChatBox = () => {
             <TabsTrigger value="help" className="text-xs">Quick Help</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="chat" className="flex-1 flex flex-col">
+          <TabsContent value="chat" className="flex-1 flex flex-col relative">
             <ScrollArea className="flex-1 p-4 max-h-[350px]">
               {messages.map((message) => (
                 <div
@@ -380,6 +455,13 @@ const ChatBox = () => {
                         <Bot className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
                       )}
                       <div className="text-sm leading-relaxed flex-1 prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-pre:my-2 prose-code:text-xs prose-pre:text-xs break-words select-text [user-select:text]">
+                        {message.imageUrl && (
+                          <img
+                            src={message.imageUrl}
+                            alt="Attached"
+                            className="rounded-lg mb-2 max-w-full border border-primary/20"
+                          />
+                        )}
                         {message.isBot ? (
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {message.text}
@@ -429,7 +511,17 @@ const ChatBox = () => {
               {isTyping && <TypingIndicator />}
               <div ref={scrollRef} />
             </ScrollArea>
+            {showJump && (
+              <button
+                onClick={jumpToLatest}
+                className="absolute bottom-[90px] right-4 z-10 bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:scale-105 transition-transform"
+                title="Jump to latest"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            )}
           </TabsContent>
+
 
 
           <TabsContent value="start" className="flex-1 p-4">
@@ -513,6 +605,58 @@ const ChatBox = () => {
 
         {activeTab === "chat" && (
           <div className="p-4 border-t border-primary/30 bg-background/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant={imageMode ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 text-[11px] px-2 gap-1"
+                  onClick={() => setImageMode(m => !m)}
+                  title="Toggle image generation mode"
+                >
+                  <ImageIcon className="w-3 h-3" />
+                  {imageMode ? "Image mode ON" : "Generate image"}
+                </Button>
+              </div>
+              {imageMode && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleReferenceUpload}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] px-2 gap-1"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Attach reference photo"
+                  >
+                    <Paperclip className="w-3 h-3" />
+                    {referenceImage ? "Photo ✓" : "Attach photo"}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {imageMode && referenceImage && (
+              <div className="mb-2 flex items-center gap-2">
+                <img src={referenceImage} alt="ref" className="w-12 h-12 rounded object-cover border border-primary/30" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-xs"
+                  onClick={() => setReferenceImage(null)}
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
+
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Textarea
@@ -520,18 +664,18 @@ const ChatBox = () => {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your message or use voice..."
+                  placeholder={imageMode ? "Describe the image to generate..." : "Type your message or use voice..."}
                   className="min-h-[40px] max-h-[100px] resize-none bg-muted/50 border-primary/30 focus:border-primary backdrop-blur-sm pr-20"
                   rows={1}
                 />
-                {speechSupported && (
+                {speechSupported && !imageMode && (
                   <div className="absolute right-12 top-1 flex gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       className={`h-8 w-8 p-0 ${
-                        isListening 
-                          ? "text-red-500 hover:text-red-600 animate-pulse" 
+                        isListening
+                          ? "text-red-500 hover:text-red-600 animate-pulse"
                           : "text-cyan-500 hover:text-cyan-600"
                       }`}
                       onClick={isListening ? stopListening : startListening}
@@ -543,15 +687,15 @@ const ChatBox = () => {
                 )}
               </div>
               <Button
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isLoading}
+                onClick={imageMode ? handleGenerateImage : handleSendMessage}
+                disabled={!inputMessage.trim() || isLoading || isGeneratingImage}
                 className="h-10 w-10 p-0 bg-gradient-to-br from-primary to-accent hover:opacity-90 shadow-lg hover:shadow-primary/50 transition-all duration-300 disabled:opacity-50"
+                title={imageMode ? "Generate image" : "Send message"}
               >
-                <Send className="w-4 h-4" />
+                {isGeneratingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : imageMode ? <Sparkles className="w-4 h-4" /> : <Send className="w-4 h-4" />}
               </Button>
-
             </div>
-            
+
             {isListening && (
               <div className="mt-2 flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs animate-pulse bg-cyan-500/20 text-cyan-600 border-cyan-500/30">
@@ -559,12 +703,13 @@ const ChatBox = () => {
                 </Badge>
               </div>
             )}
-            
+
             <div className="mt-2 text-xs text-muted-foreground text-center">
               🎉 <strong>FREE CONSULTATION NOW</strong> • Offer ends soon!
             </div>
           </div>
         )}
+
       </Card>
     </div>
   );
