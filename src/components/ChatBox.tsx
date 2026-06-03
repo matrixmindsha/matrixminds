@@ -88,21 +88,87 @@ const ChatBox = () => {
     }
   }, []);
 
-  // Auto-scroll only when the user is already near the bottom,
-  // so they can freely scroll up / select text while AI is streaming.
+  // Track scroll position to decide whether to auto-follow streaming text.
+  // The moment the user scrolls up, auto-scroll is OFF until they scroll back to bottom
+  // (or click the Jump-to-latest button).
   useEffect(() => {
+    if (!isOpen) return;
     const anchor = scrollRef.current;
     if (!anchor) return;
     const viewport = anchor.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
-    if (!viewport) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+    viewportRef.current = viewport;
+    if (!viewport) return;
+    const onScroll = () => {
+      const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      const atBottom = distance < 40;
+      setAutoScroll(atBottom);
+      setShowJump(!atBottom);
+    };
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', onScroll);
+  }, [isOpen, activeTab]);
+
+  useEffect(() => {
+    if (!autoScroll) return;
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, isTyping, autoScroll]);
+
+  const jumpToLatest = () => {
+    setAutoScroll(true);
+    setShowJump(false);
+    scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  };
+
+  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 4 MB.", variant: "destructive" });
       return;
     }
-    const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-    if (distanceFromBottom < 120) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "end" });
+    const reader = new FileReader();
+    reader.onload = () => setReferenceImage(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleGenerateImage = async () => {
+    if (!inputMessage.trim() || isGeneratingImage) return;
+    const prompt = inputMessage;
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      text: `🎨 Generate: ${prompt}`,
+      isBot: false,
+      timestamp: new Date(),
+      imageUrl: referenceImage || undefined,
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setInputMessage("");
+    setIsGeneratingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt, referenceImage },
+      });
+      if (error) throw error;
+      if (!data?.imageUrl) throw new Error('No image returned');
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        text: 'Here is your generated image:',
+        isBot: true,
+        timestamp: new Date(),
+        imageUrl: data.imageUrl,
+      }]);
+      setReferenceImage(null);
+    } catch (err: any) {
+      toast({
+        title: "Image generation failed",
+        description: err?.message || 'Try again later.',
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
     }
-  }, [messages, isTyping]);
+  };
+
 
 
   const predefinedResponses: { [key: string]: string } = {
