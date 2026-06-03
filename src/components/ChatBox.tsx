@@ -267,11 +267,11 @@ const ChatBox = () => {
         },
         () => {
           setIsTyping(false);
-          // Speak the response
-          if ('speechSynthesis' in window && assistantResponse) {
+          // Only speak if the user has enabled voice mode.
+          if (voiceEnabled && 'speechSynthesis' in window && assistantResponse) {
             const cleanText = assistantResponse.replace(/[🚀🧠📞🎉👋🤔📧☎️🌍⚡🔒🎯🌐]/g, '');
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.rate = 0.8;
+            utterance.rate = 0.9;
             speechSynthesis.speak(utterance);
           }
         }
