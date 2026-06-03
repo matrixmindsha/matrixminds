@@ -478,7 +478,7 @@ const ChatBox = () => {
           </TabsList>
 
           <TabsContent value="chat" className="flex-1 flex flex-col relative">
-            <ScrollArea className="flex-1 p-4 max-h-[350px]">
+            <ScrollArea className="flex-1 p-4 min-h-0">
               {messages.map((message) => (
                 <div
                   key={message.id}
