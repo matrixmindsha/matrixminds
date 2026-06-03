@@ -312,8 +312,9 @@ const ChatBox = () => {
     }
   };
 
-  // Drag functionality
+  // Drag functionality (disabled on small screens)
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) return;
     if ((e.target as HTMLElement).closest('.drag-handle')) {
       setIsDragging(true);
       setDragStart({
