@@ -455,6 +455,13 @@ const ChatBox = () => {
                         <Bot className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
                       )}
                       <div className="text-sm leading-relaxed flex-1 prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-pre:my-2 prose-code:text-xs prose-pre:text-xs break-words select-text [user-select:text]">
+                        {message.imageUrl && (
+                          <img
+                            src={message.imageUrl}
+                            alt="Attached"
+                            className="rounded-lg mb-2 max-w-full border border-primary/20"
+                          />
+                        )}
                         {message.isBot ? (
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {message.text}
