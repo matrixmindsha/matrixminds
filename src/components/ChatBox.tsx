@@ -43,6 +43,13 @@ const ChatBox = () => {
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLElement | null>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [showJump, setShowJump] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { streamChat, isLoading } = useAIChat();
   const { toast } = useToast();
 
