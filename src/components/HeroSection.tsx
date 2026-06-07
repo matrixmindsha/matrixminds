@@ -31,10 +31,10 @@ const HeroSection = () => {
             <h1 className="font-orbitron text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-float">
               Matrix Minds — Global AI &amp; Cybersecurity Solutions
             </h1>
-            <p className="font-rajdhani text-xl md:text-2xl text-muted-foreground mb-4 font-semibold">
+            <p className="font-rajdhani text-xl md:text-2xl text-foreground mb-4 font-semibold">
               Building the Future with AI • Worldwide Services
             </p>
-            <p className="font-exo text-lg text-foreground/80 mb-8 max-w-2xl mx-auto">
+            <p className="font-exo text-lg text-foreground mb-8 max-w-2xl mx-auto">
               🌍 Serving clients globally with cutting-edge artificial intelligence, ethical hacking, and data science expertise. Remote consulting worldwide. FREE consultation available now!
             </p>
           </div>
