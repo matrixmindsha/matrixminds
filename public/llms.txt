@@ -1,13 +1,33 @@
 # Matrix Minds
 
-> AI, machine learning, data science and ethical-hacking solutions worldwide, founded by S. Hareedh.
+> AI, machine learning, data science and ethical-hacking consultancy founded by S. Hareedh (often searched as "Matrix Minds Hareedh"). Serving clients worldwide from India.
 
 Matrix Minds is a global technology studio specializing in custom AI/ML
-solutions, cybersecurity & penetration testing, data analytics, and
-bespoke software. Contact: matrixmindsha@gmail.com / +91 9629310410.
+solutions, cybersecurity and penetration testing, data analytics, and
+bespoke software. Founded and led by Mr. S. Hareedh.
 
-## Pages
-- [Home](/): Overview of Matrix Minds services, founder, projects, store, and contact.
+Contact: matrixmindsha@gmail.com · +91 96293 10410 (Call / WhatsApp)
+
+## About
+
+- [About & Founder](/#founder): Biography of S. Hareedh, founder and CEO of Matrix Minds — background in AI, ML and cybersecurity.
+- [Mission & Expertise](/#about): What Matrix Minds does and why clients pick us.
+
+## Services
+
+- [AI & Machine Learning](/#services): Custom predictive models, neural networks, intelligent automation and AI consulting.
+- [Ethical Hacking & Cybersecurity](/#services): Authorised penetration testing, vulnerability assessments, security audits.
+- [Data Science & Analytics](/#services): Turning raw business data into actionable insights and dashboards.
+
+## Store
+
+- [eBooks & Source Code](/#store): Practical eBooks and ready-to-use source-code bundles for AI, ML and cybersecurity learners.
+
+## Contact
+
+- [Free Consultation](/#contact): Book a free initial consultation worldwide — remote delivery.
 
 ## Optional
+
 - [Sitemap](/sitemap.xml): Crawlable URL list for the site.
+- [Robots](/robots.txt): Crawler rules.
