@@ -17,7 +17,7 @@ const Auth = () => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate('/analytics');
+      if (data.session) navigate('/admin');
     });
   }, [navigate]);
 
@@ -29,7 +29,7 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/analytics` },
+          options: { emailRedirectTo: `${window.location.origin}/admin` },
         });
         if (error) throw error;
         toast({ title: 'Account created', description: 'You can now sign in.' });
@@ -37,7 +37,7 @@ const Auth = () => {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate('/analytics');
+        navigate('/admin');
       }
     } catch (err) {
       toast({
