@@ -7,12 +7,14 @@ import { useAuth, useStoreAccess } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const UPI_ID = "9942658278@ptyes";
+import { UPI_ACCOUNTS, buildUpiUrl, type UpiAccount } from "@/lib/upi";
+import UpiPicker from "./UpiPicker";
+
 const PAYEE = "Matrix Minds";
 const INTL_EMAIL = "matrixmindsha@gmail.com";
 
-const buildUpi = (amt: number, note: string) =>
-  `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE)}&cu=INR&am=${amt}&tn=${encodeURIComponent(note)}`;
+const buildUpi = (vpa: string, amt: number, note: string) =>
+  buildUpiUrl(vpa, { amount: amt, name: PAYEE, note });
 
 const buildIntlMail = (title: string, usd: number) =>
   `mailto:${INTL_EMAIL}?subject=${encodeURIComponent(`International order: ${title} ($${usd})`)}&body=${encodeURIComponent(
@@ -43,6 +45,7 @@ const PRODUCTS: Product[] = [
 
 const StoreSection = () => {
   const [currency, setCurrency] = useState<Currency>("INR");
+  const [account, setAccount] = useState<UpiAccount>(UPI_ACCOUNTS[0]);
   const { user } = useAuth();
   const { isAdmin, checking } = useStoreAccess(user?.id);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -129,6 +132,13 @@ const StoreSection = () => {
           </div>
         </div>
 
+        {currency === "INR" && !isAdmin && (
+          <div className="max-w-xl mx-auto mb-8 rounded-2xl border border-primary/30 bg-card/40 backdrop-blur-md p-4">
+            <UpiPicker value={account.id} onChange={setAccount} />
+          </div>
+        )}
+
+
         <div className="grid md:grid-cols-2 gap-6">
           {PRODUCTS.map((product) => {
             const { id, title, tagline, bullets, Icon, accent, price, usdPrice, pdf, zip } = product;
@@ -185,8 +195,8 @@ const StoreSection = () => {
                       </>
                     ) : currency === "INR" ? (
                       <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
-                        <a href={buildUpi(price, `${title} — Matrix Minds`)}>
-                          <Smartphone className="mr-2 w-4 h-4" /> Pay ₹{price} via UPI
+                        <a href={buildUpi(account.vpa, price, `${title} — Matrix Minds`)}>
+                          <Smartphone className="mr-2 w-4 h-4" /> Pay ₹{price} via {account.bank}
                         </a>
                       </Button>
                     ) : (
@@ -200,7 +210,7 @@ const StoreSection = () => {
                     {!isAdmin && (
                       <p className="text-[10px] text-muted-foreground text-center">
                         {currency === "INR" ? (
-                          <>UPI: <span className="font-mono">{UPI_ID}</span> · Resources sent to your email from <span className="font-mono">{INTL_EMAIL}</span></>
+                          <>UPI: <span className="font-mono">{account.vpa}</span> · Resources sent from <span className="font-mono">{INTL_EMAIL}</span></>
                         ) : (
                           <>PayPal / Wise / card via <span className="font-mono">{INTL_EMAIL}</span></>
                         )}

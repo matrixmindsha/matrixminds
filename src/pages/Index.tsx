@@ -6,6 +6,8 @@ import LaunchSection from "@/components/LaunchSection";
 import StoreSection from "@/components/StoreSection";
 import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
+import ProjectsShowcase from "@/components/ProjectsShowcase";
+import SectionAura from "@/components/SectionAura";
 import AdSlot from "@/components/AdSlot";
 import StickyDonate from "@/components/StickyDonate";
 import { 
@@ -50,18 +52,34 @@ const Index = () => {
             <LazyHeroSection />
           </Suspense>
           <AdSlot label="Sponsored" />
-          <Suspense fallback={<SectionSkeleton />}>
-            <LazyAboutSection />
-          </Suspense>
-          <LaunchSection />
-          <StoreSection />
-          <Suspense fallback={<SectionSkeleton />}>
-            <LazyCertificationsSection />
-          </Suspense>
+          <div className="relative">
+            <SectionAura variant="cyan" />
+            <Suspense fallback={<SectionSkeleton />}>
+              <LazyAboutSection />
+            </Suspense>
+          </div>
+          <div className="relative">
+            <SectionAura variant="amber" grid={false} />
+            <LaunchSection />
+          </div>
+          <div className="relative">
+            <SectionAura variant="emerald" />
+            <StoreSection />
+          </div>
+          <ProjectsShowcase />
+          <div className="relative">
+            <SectionAura variant="rose" />
+            <Suspense fallback={<SectionSkeleton />}>
+              <LazyCertificationsSection />
+            </Suspense>
+          </div>
           <AdSlot label="Advertisement" />
-          <Suspense fallback={<SectionSkeleton />}>
-            <LazyServicesSection />
-          </Suspense>
+          <div className="relative">
+            <SectionAura variant="blue" />
+            <Suspense fallback={<SectionSkeleton />}>
+              <LazyServicesSection />
+            </Suspense>
+          </div>
           <AdSlot label="Sponsored" />
           <Suspense fallback={<SectionSkeleton />}>
             <LazyFeedbackSection />
