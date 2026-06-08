@@ -10,6 +10,7 @@ const HH_URL = "https://hriharionline.lovable.app/";
 
 const LaunchSection = () => {
   const [amount, setAmount] = useState<string>("");
+  const [account, setAccount] = useState<UpiAccount>(UPI_ACCOUNTS[0]);
   const numAmount = Number(amount);
   const validAmount = !isNaN(numAmount) && numAmount > 0;
   return (
@@ -95,17 +96,13 @@ const LaunchSection = () => {
                 contribution — big or small — powers our next launch.
               </p>
 
-              <div className="rounded-xl border border-accent/30 bg-background/40 p-4 mb-6">
-                <p className="text-xs text-muted-foreground mb-1">
-                  UPI / Pay To
-                </p>
-                <p className="font-mono text-lg font-bold text-foreground select-all">
-                  {UPI_ID}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
+              <div className="mb-6">
+                <UpiPicker value={account.id} onChange={setAccount} />
+                <p className="text-[11px] text-muted-foreground mt-2 text-center">
                   Matrix Minds • Founded by Mr. S. Hareedh
                 </p>
               </div>
+
 
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {[100, 500, 1000].map((amt) => (
@@ -144,8 +141,8 @@ const LaunchSection = () => {
                 className="w-full font-orbitron font-bold"
               >
                 {validAmount ? (
-                  <a href={buildUpiUrl(numAmount)}>
-                    <Heart className="mr-2 w-4 h-4" /> Donate ₹{numAmount}
+                  <a href={buildUpiUrl(account.vpa, { amount: numAmount, note: "Matrix Minds Donation" })}>
+                    <Heart className="mr-2 w-4 h-4" /> Donate ₹{numAmount} via {account.bank}
                   </a>
                 ) : (
                   <span>
