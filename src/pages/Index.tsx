@@ -6,6 +6,8 @@ import LaunchSection from "@/components/LaunchSection";
 import StoreSection from "@/components/StoreSection";
 import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
+import ProjectsShowcase from "@/components/ProjectsShowcase";
+import SectionAura from "@/components/SectionAura";
 import AdSlot from "@/components/AdSlot";
 import StickyDonate from "@/components/StickyDonate";
 import { 
