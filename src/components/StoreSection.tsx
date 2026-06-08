@@ -132,6 +132,13 @@ const StoreSection = () => {
           </div>
         </div>
 
+        {currency === "INR" && !isAdmin && (
+          <div className="max-w-xl mx-auto mb-8 rounded-2xl border border-primary/30 bg-card/40 backdrop-blur-md p-4">
+            <UpiPicker value={account.id} onChange={setAccount} />
+          </div>
+        )}
+
+
         <div className="grid md:grid-cols-2 gap-6">
           {PRODUCTS.map((product) => {
             const { id, title, tagline, bullets, Icon, accent, price, usdPrice, pdf, zip } = product;
