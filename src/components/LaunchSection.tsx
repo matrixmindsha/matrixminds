@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExternalLink, Gamepad2, Heart, Sparkles } from "lucide-react";
 import UpiPicker from "./UpiPicker";
-import { UPI_ACCOUNTS, buildUpiUrl, type UpiAccount } from "@/lib/upi";
+import { UPI_ACCOUNTS, type UpiAccount } from "@/lib/upi";
 
 const HH_URL = "https://hriharionline.lovable.app/";
 
