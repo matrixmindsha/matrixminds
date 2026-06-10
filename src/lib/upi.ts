@@ -4,6 +4,8 @@ export type UpiAccount = {
   name: string;
   label: string;
   bank: string;
+  phone?: string;
+  holder?: string;
 };
 
 export const UPI_ACCOUNTS: UpiAccount[] = [
