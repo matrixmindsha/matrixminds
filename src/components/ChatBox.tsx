@@ -92,10 +92,7 @@ const ChatBox = () => {
   // A "Jump to latest" button appears whenever the user is not at the bottom.
   useEffect(() => {
     if (!isOpen) return;
-    const anchor = scrollRef.current;
-    if (!anchor) return;
-    const viewport = anchor.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
-    viewportRef.current = viewport;
+    const viewport = viewportRef.current;
     if (!viewport) return;
     const onScroll = () => {
       const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
