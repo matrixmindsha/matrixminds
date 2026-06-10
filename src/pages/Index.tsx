@@ -8,6 +8,7 @@ import ChatBox from "@/components/ChatBox";
 import TechBackground from "@/components/TechBackground";
 import ProjectsShowcase from "@/components/ProjectsShowcase";
 import SectionAura from "@/components/SectionAura";
+import Reveal from "@/components/Reveal";
 import AdSlot from "@/components/AdSlot";
 import StickyDonate from "@/components/StickyDonate";
 import { 
