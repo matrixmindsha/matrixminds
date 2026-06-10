@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { UPI_ACCOUNTS, buildUpiUrl, type UpiAccount } from "@/lib/upi";
 import UpiPicker from "./UpiPicker";
+import UpiQR from "./UpiQR";
 
 const PAYEE = "Matrix Minds";
 const INTL_EMAIL = "matrixmindsha@gmail.com";
@@ -133,8 +134,14 @@ const StoreSection = () => {
         </div>
 
         {currency === "INR" && !isAdmin && (
-          <div className="max-w-xl mx-auto mb-8 rounded-2xl border border-primary/30 bg-card/40 backdrop-blur-md p-4">
+          <div className="max-w-3xl mx-auto mb-8 rounded-2xl border border-primary/30 bg-card/40 backdrop-blur-md p-4 grid md:grid-cols-[1fr_auto] gap-4 items-center">
             <UpiPicker value={account.id} onChange={setAccount} />
+            <UpiQR
+              vpa={account.vpa}
+              name={PAYEE}
+              note={`Matrix Minds — ${account.bank}`}
+              caption="Scan to pay, or use the Pay button below. After paying, your eBook + source code is emailed within 24h."
+            />
           </div>
         )}
 
