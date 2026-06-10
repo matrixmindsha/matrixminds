@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { UPI_ACCOUNTS, buildUpiUrl, type UpiAccount } from "@/lib/upi";
 import UpiPicker from "./UpiPicker";
+import UpiQR from "./UpiQR";
 
 const PAYEE = "Matrix Minds";
 const INTL_EMAIL = "matrixmindsha@gmail.com";
