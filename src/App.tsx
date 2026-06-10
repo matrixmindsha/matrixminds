@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import { AnalyticsDashboard } from "./components/AnalyticsDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import Pay from "./pages/Pay";
 
 const queryClient = new QueryClient();
 
