@@ -55,39 +55,55 @@ const Index = () => {
           <AdSlot label="Sponsored" />
           <div className="relative">
             <SectionAura variant="cyan" />
-            <Suspense fallback={<SectionSkeleton />}>
-              <LazyAboutSection />
-            </Suspense>
+            <Reveal>
+              <Suspense fallback={<SectionSkeleton />}>
+                <LazyAboutSection />
+              </Suspense>
+            </Reveal>
           </div>
           <div className="relative">
             <SectionAura variant="amber" grid={false} />
-            <LaunchSection />
+            <Reveal>
+              <LaunchSection />
+            </Reveal>
           </div>
           <div className="relative">
             <SectionAura variant="emerald" />
-            <StoreSection />
+            <Reveal>
+              <StoreSection />
+            </Reveal>
           </div>
-          <ProjectsShowcase />
+          <Reveal>
+            <ProjectsShowcase />
+          </Reveal>
           <div className="relative">
             <SectionAura variant="rose" />
-            <Suspense fallback={<SectionSkeleton />}>
-              <LazyCertificationsSection />
-            </Suspense>
+            <Reveal>
+              <Suspense fallback={<SectionSkeleton />}>
+                <LazyCertificationsSection />
+              </Suspense>
+            </Reveal>
           </div>
           <AdSlot label="Advertisement" />
           <div className="relative">
             <SectionAura variant="blue" />
-            <Suspense fallback={<SectionSkeleton />}>
-              <LazyServicesSection />
-            </Suspense>
+            <Reveal>
+              <Suspense fallback={<SectionSkeleton />}>
+                <LazyServicesSection />
+              </Suspense>
+            </Reveal>
           </div>
           <AdSlot label="Sponsored" />
-          <Suspense fallback={<SectionSkeleton />}>
-            <LazyFeedbackSection />
-          </Suspense>
-          <Suspense fallback={<SectionSkeleton />}>
-            <LazyContactSection />
-          </Suspense>
+          <Reveal>
+            <Suspense fallback={<SectionSkeleton />}>
+              <LazyFeedbackSection />
+            </Suspense>
+          </Reveal>
+          <Reveal>
+            <Suspense fallback={<SectionSkeleton />}>
+              <LazyContactSection />
+            </Suspense>
+          </Reveal>
         </main>
         <Footer />
         <ChatBox />
