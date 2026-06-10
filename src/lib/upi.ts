@@ -4,15 +4,19 @@ export type UpiAccount = {
   name: string;
   label: string;
   bank: string;
+  phone?: string;
+  holder?: string;
 };
 
 export const UPI_ACCOUNTS: UpiAccount[] = [
   {
     id: "primary",
-    vpa: "9942658278@ptyes",
+    vpa: "9942658278@ybl",
     name: "Matrix Minds",
     label: "Matrix Minds (PhonePe)",
     bank: "PhonePe / UPI",
+    phone: "9942658278",
+    holder: "N Anitha",
   },
   {
     id: "icici",
@@ -20,6 +24,8 @@ export const UPI_ACCOUNTS: UpiAccount[] = [
     name: "Matrix Minds",
     label: "Matrix Minds (ICICI)",
     bank: "ICICI Bank",
+    phone: "9942658278",
+    holder: "N Anitha",
   },
 ];
 

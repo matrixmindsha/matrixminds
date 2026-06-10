@@ -202,9 +202,9 @@ const StoreSection = () => {
                       </>
                     ) : currency === "INR" ? (
                       <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
-                        <a href={buildUpi(account.vpa, price, `${title} — Matrix Minds`)}>
-                          <Smartphone className="mr-2 w-4 h-4" /> Pay ₹{price} via {account.bank}
-                        </a>
+                        <Link to={`/pay?account=${account.id}&amount=${price}&title=${encodeURIComponent(title)}&note=${encodeURIComponent(`${title} — Matrix Minds`)}`}>
+                          <Smartphone className="mr-2 w-4 h-4" /> Pay ₹{price} via UPI / PhonePe / QR
+                        </Link>
                       </Button>
                     ) : (
                       <Button asChild variant="hero" size="lg" className="w-full font-orbitron font-bold">
