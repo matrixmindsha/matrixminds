@@ -92,10 +92,7 @@ const ChatBox = () => {
   // A "Jump to latest" button appears whenever the user is not at the bottom.
   useEffect(() => {
     if (!isOpen) return;
-    const anchor = scrollRef.current;
-    if (!anchor) return;
-    const viewport = anchor.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
-    viewportRef.current = viewport;
+    const viewport = viewportRef.current;
     if (!viewport) return;
     const onScroll = () => {
       const distance = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
@@ -477,8 +474,14 @@ const ChatBox = () => {
             <TabsTrigger value="help" className="text-xs">Quick Help</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="chat" className="flex-1 flex flex-col relative">
-            <ScrollArea className="flex-1 p-4 min-h-0">
+          <TabsContent value="chat" className="flex-1 flex flex-col relative min-h-0 overflow-hidden">
+            <div
+              ref={(el) => { viewportRef.current = el; }}
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4"
+              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -553,11 +556,11 @@ const ChatBox = () => {
               ))}
               {isTyping && <TypingIndicator />}
               <div ref={scrollRef} />
-            </ScrollArea>
+            </div>
             {showJump && (
               <button
                 onClick={jumpToLatest}
-                className="absolute bottom-[90px] right-4 z-10 bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:scale-105 transition-transform"
+                className="absolute bottom-4 right-4 z-10 bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:scale-105 transition-transform"
                 title="Jump to latest"
               >
                 <ChevronDown className="w-4 h-4" />
