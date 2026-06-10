@@ -142,9 +142,9 @@ const LaunchSection = () => {
                 className="w-full font-orbitron font-bold"
               >
                 {validAmount ? (
-                  <a href={buildUpiUrl(account.vpa, { amount: numAmount, note: "Matrix Minds Donation" })}>
-                    <Heart className="mr-2 w-4 h-4" /> Donate ₹{numAmount} via {account.bank}
-                  </a>
+                  <Link to={`/pay?account=${account.id}&amount=${numAmount}&note=${encodeURIComponent("Matrix Minds Donation")}&title=${encodeURIComponent("Donation to Matrix Minds")}`}>
+                    <Heart className="mr-2 w-4 h-4" /> Donate ₹{numAmount} via UPI / PhonePe / QR
+                  </Link>
                 ) : (
                   <span>
                     <Heart className="mr-2 w-4 h-4" /> Enter an amount to donate
